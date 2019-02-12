@@ -1,0 +1,4 @@
+package dulcinea
+
+class HangmanGame {
+}

@@ -15,6 +15,7 @@ class HangmanVerticle extends AbstractVerticle {
         router.route().handler(BodyHandler.create())
         router.post("/game").handler(startGame)
         router.put("/game").handler(performTurn)
+        router.delete("/game").handler(removeTurn)
         router.get("/game").handler(getStatus)
 
         vertx.createHttpServer().requestHandler({req ->
@@ -24,7 +25,8 @@ class HangmanVerticle extends AbstractVerticle {
     }
 
     private Handler<RoutingContext> startGame = ( { req ->
-        Map<String, Object> body = safelyGetBody(req)
+        Map<String, Object> body = safelyHandleBody(req)
+        println body
         req.response()
                 .setStatusCode(200)
                 .putHeader(CONTENT_TYPE, JSON_CONTENT)
@@ -32,12 +34,20 @@ class HangmanVerticle extends AbstractVerticle {
     })
 
     private Handler<RoutingContext> performTurn = ( { req ->
-        Map<String, Object> body = safelyGetBody(req)
+        Map<String, Object> body = safelyHandleBody(req)
         req.response()
         .setStatusCode(200)
         .putHeader(CONTENT_TYPE, JSON_CONTENT)
         .end("put")
 
+    })
+
+    private Handler<RoutingContext> removeTurn = ( { req ->
+        Map<String, Object> body = safelyHandleBody(req)
+        req.response()
+            .setStatusCode(200)
+            .putHeader(CONTENT_TYPE, JSON_CONTENT)
+            .end("{}")
     })
 
     private Handler<RoutingContext> getStatus = ( { req ->
@@ -47,7 +57,7 @@ class HangmanVerticle extends AbstractVerticle {
             .end("{}")
     })
 
-    private Map<String, Object> safelyGetBody(RoutingContext req) {
+    private Map<String, Object> safelyHandleBody(RoutingContext req) {
         Map<String, Object> body = new HashMap<>()
         try {
             body = req.getBodyAsJson().getMap()
