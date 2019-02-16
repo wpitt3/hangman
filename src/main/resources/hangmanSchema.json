@@ -1,0 +1,29 @@
+  {
+    "settings": {
+      "index": {
+        "refresh_interval": "5s",
+        "number_of_shards": 5,
+        "number_of_replicas": 1
+      }
+    },
+    "mappings": {
+      "_doc": {
+        "include_in_all": false,
+        "dynamic": "strict",
+        "properties": {
+          "count": {
+            "type": "keyword"
+          },
+          "position": {
+            "type": "keyword"
+          },
+          "unique": {
+            "type": "keyword"
+          },
+          "word": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  }

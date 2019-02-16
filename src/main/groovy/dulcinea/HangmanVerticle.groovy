@@ -9,6 +9,8 @@ import io.vertx.ext.web.handler.BodyHandler
 class HangmanVerticle extends AbstractVerticle {
     private static final String JSON_CONTENT = "application/json"
     private static final String CONTENT_TYPE = "content-type"
+    private HangmanGame hangmanGame
+    private boolean ready = false;
 
     void start() {
         Router router = Router.router(vertx)
@@ -17,6 +19,11 @@ class HangmanVerticle extends AbstractVerticle {
         router.put("/game").handler(performTurn)
         router.delete("/game").handler(removeTurn)
         router.get("/game").handler(getStatus)
+
+        hangmanGame = new HangmanGame()
+        hangmanGame.setup {
+            ready = true
+        }
 
         vertx.createHttpServer().requestHandler({req ->
                 router.accept(req)
