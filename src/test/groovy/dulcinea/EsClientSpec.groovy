@@ -13,7 +13,7 @@ class EsClientSpec extends Specification {
 
     def setupSpec() {
         BlockingVariable deployed = new BlockingVariable(10)
-        esClient = new EsClient("test")
+        esClient = new EsClient("hangman")
         esClient.setup {
             deployed.set(true)
         }
@@ -30,10 +30,11 @@ class EsClientSpec extends Specification {
 
     void "Basic index"(){
         when:
-          esClient.index(new Word("castle"), setResult)
+          esClient.index(new Word("mitten"), setResult)
 
         then:
           result.get()
+          result.get().result.lowercase == "created"
     }
 
     void "Basic get"(){
