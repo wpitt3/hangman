@@ -13,7 +13,7 @@ class EsClientSpec extends Specification {
 
     def setupSpec() {
         BlockingVariable deployed = new BlockingVariable(10)
-        esClient = new EsClient("hangman")
+        esClient = new EsClient("test")
         esClient.setup {
             deployed.set(true)
         }
@@ -28,21 +28,16 @@ class EsClientSpec extends Specification {
         esClient.close()
     }
 
-    void "Basic index"(){
+    void "Basic indexTest"(){
         when:
-          esClient.index(new Word("mitten"), setResult)
+          esClient.delete("MITTEN", {
+              esClient.index(new Word("mitten"), {
+                  esClient.get(setResult)
+              })
+          })
 
         then:
-          result.get()
-          result.get().result.lowercase == "created"
-    }
-
-    void "Basic get"(){
-        when:
-          esClient.get(setResult)
-
-        then:
-          result.get()
+          result.get().hits.collect{ it.id }.contains("MITTEN")
     }
 
     Closure setResult = {

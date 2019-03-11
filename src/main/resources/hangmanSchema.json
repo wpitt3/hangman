@@ -17,6 +17,9 @@
           "position": {
             "type": "keyword"
           },
+          "positionOfSingle": {
+            "type": "keyword"
+          },
           "unique": {
             "type": "keyword"
           },

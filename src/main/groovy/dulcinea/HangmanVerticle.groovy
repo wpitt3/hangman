@@ -10,9 +10,10 @@ class HangmanVerticle extends AbstractVerticle {
     private static final String JSON_CONTENT = "application/json"
     private static final String CONTENT_TYPE = "content-type"
     private HangmanGame hangmanGame
-    private boolean ready = false;
+    private boolean ready = false
 
     void start() {
+        System.setProperty("es.set.netty.runtime.available.processors", "false");
         Router router = Router.router(vertx)
         router.route().handler(BodyHandler.create())
         router.post("/game").handler(startGame)
@@ -46,7 +47,6 @@ class HangmanVerticle extends AbstractVerticle {
         .setStatusCode(200)
         .putHeader(CONTENT_TYPE, JSON_CONTENT)
         .end("put")
-
     })
 
     private Handler<RoutingContext> removeTurn = ( { req ->

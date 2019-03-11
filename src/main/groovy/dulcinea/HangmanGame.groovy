@@ -8,6 +8,7 @@ class HangmanGame {
   }
 
   void setup(Closure onComplete) {
+    client = new EsClient()
     client.setup(onComplete)
   }
 
