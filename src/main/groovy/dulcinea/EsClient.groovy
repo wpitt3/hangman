@@ -64,8 +64,14 @@ class EsClient {
     return termsAggregationBuilder
   }
 
+  private TermsAggregationBuilder buildNegAgg(Integer size) {
+    TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms("neg").field("negative")
+    termsAggregationBuilder.size(size)
+    return termsAggregationBuilder
+  }
+
   private getAggs(def response) {
-    return response.aggregations.asMap.pos?.buckets
+    return (response.aggregations.asMap.pos?.buckets ?: []) + response.aggregations.asMap.neg?.buckets
   }
 
   private parseAgg(Terms.Bucket agg) {
@@ -77,18 +83,29 @@ class EsClient {
     if( depth == 1) {
       return buildPOSAgg(size)
     } else {
-      return buildPOSAgg(size).subAggregation(buildPOSAggToDepth(depth-1, size))
+      TermsAggregationBuilder termsAggregationBuilder = buildPOSAgg(size)
+      termsAggregationBuilder.subAggregation(buildPOSAggToDepth(depth-1, size))
+      termsAggregationBuilder.subAggregation(buildNegAggToDepth(depth-1, size))
+    }
+  }
+
+  private TermsAggregationBuilder buildNegAggToDepth(Integer depth, Integer size) {
+    if( depth == 1) {
+      return buildNegAgg(size)
+    } else {
+      TermsAggregationBuilder termsAggregationBuilder = buildNegAgg(size)
+      termsAggregationBuilder.subAggregation(buildPOSAggToDepth(depth-1, size))
+      termsAggregationBuilder.subAggregation(buildNegAggToDepth(depth-1, size))
     }
   }
 
   void someBetterName(Closure onComplete, String a) {
     QueryBuilder queryBuilder = QueryBuilders.termQuery("unique", a)
-    TermsAggregationBuilder termsAggregationBuilder = buildPOSAggToDepth(3, 10)
-
     SearchResponse searchResponse = client.prepareSearch(index)
         .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
         .setQuery(queryBuilder)
-        .addAggregation(termsAggregationBuilder)
+        .addAggregation(buildPOSAggToDepth(1, 10))
+        .addAggregation(buildNegAggToDepth(1, 10))
         .setFrom(0).setSize(0)
         .get()
 
@@ -110,3 +127,4 @@ class EsClient {
     }
   }
 }
+

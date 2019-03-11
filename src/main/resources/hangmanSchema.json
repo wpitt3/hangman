@@ -14,6 +14,9 @@
           "count": {
             "type": "keyword"
           },
+          "negative": {
+            "type": "keyword"
+          },
           "position": {
             "type": "keyword"
           },

@@ -7,6 +7,7 @@ class Word {
   final List<String> unique
   final List<String> count
   final List<String> positionOfSingle
+  final List<String> negative
 
   Word(String word) {
     this.word = word.toUpperCase()
@@ -17,10 +18,11 @@ class Word {
     positionOfSingle = (0..(letters.size()-1))
         .findAll{ count.contains("1${letters[it]}") }
         .collect{ "${letters[it]}$it"}
+    negative = (0..25).collect{ ((char)(it + 65)).toString()}.findAll{ !unique.contains(it) }
   }
 
   Map asMap(){
-    return [word: word, unique: unique, position: position, count: count, positionOfSingle:positionOfSingle]
+    return [word: word, unique: unique, position: position, count: count, positionOfSingle:positionOfSingle, negative:negative]
   }
 
 }
