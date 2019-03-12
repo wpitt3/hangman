@@ -17,9 +17,10 @@ class HangmanVerticle extends AbstractVerticle {
         Router router = Router.router(vertx)
         router.route().handler(BodyHandler.create())
         router.post("/game").handler(startGame)
-        router.put("/game").handler(performTurn)
+        router.put("/game/:letter").handler(performTurn)
+        router.get("/game/:letter").handler(performTurn)
         router.delete("/game").handler(removeTurn)
-        router.get("/game").handler(getStatus)
+//        router.get("/game").handler(getStatus)
 
         hangmanGame = new HangmanGame()
         hangmanGame.setup {
@@ -33,20 +34,29 @@ class HangmanVerticle extends AbstractVerticle {
     }
 
     private Handler<RoutingContext> startGame = ( { req ->
-        Map<String, Object> body = safelyHandleBody(req)
-        println body
+        hangmanGame.start()
         req.response()
                 .setStatusCode(200)
                 .putHeader(CONTENT_TYPE, JSON_CONTENT)
-                .end("post")
+                .end("restarted")
     })
 
     private Handler<RoutingContext> performTurn = ( { req ->
-        Map<String, Object> body = safelyHandleBody(req)
-        req.response()
-        .setStatusCode(200)
-        .putHeader(CONTENT_TYPE, JSON_CONTENT)
-        .end("put")
+        String letter = req.pathParam("letter")
+        if (letter && letter.length() == 1) {
+            hangmanGame.addLetter(letter.toUpperCase(), { response ->
+                req.response()
+                    .setStatusCode(200)
+                    .putHeader(CONTENT_TYPE, JSON_CONTENT)
+                    .end(response)
+            })
+        } else [
+            req.response()
+                .setStatusCode(400)
+                .putHeader(CONTENT_TYPE, JSON_CONTENT)
+                .end()
+        ]
+
     })
 
     private Handler<RoutingContext> removeTurn = ( { req ->

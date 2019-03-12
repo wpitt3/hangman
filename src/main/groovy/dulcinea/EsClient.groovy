@@ -10,6 +10,7 @@ import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.TransportAddress
 import org.elasticsearch.common.xcontent.XContentType
+import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.aggregations.AggregationBuilders
@@ -17,14 +18,12 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 
-import javax.management.Query
-
 class EsClient {
 
   private TransportClient client
   private String index
 
-  EsClient(String index = "word") {
+  EsClient(String index = "hangman") {
     this.index = index
   }
 
@@ -58,59 +57,54 @@ class EsClient {
     onComplete(x)
   }
 
-  private TermsAggregationBuilder buildPOSAgg(Integer size) {
-    TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms("pos").field("positionOfSingle")
+  private TermsAggregationBuilder buildPOSAgg(Integer size, String field) {
+    TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms(field).field(field)
     termsAggregationBuilder.size(size)
     return termsAggregationBuilder
   }
 
-  private TermsAggregationBuilder buildNegAgg(Integer size) {
-    TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms("neg").field("negative")
-    termsAggregationBuilder.size(size)
-    return termsAggregationBuilder
+  //"positionOfSingle"
+  //negative
+
+  private List getAggs(def response) {
+    return (response.aggregations.asMap.positionOfSingle?.buckets ?: []) + (response.aggregations.asMap.negative?.buckets  ?: [])
   }
 
-  private getAggs(def response) {
-    return (response.aggregations.asMap.pos?.buckets ?: []) + response.aggregations.asMap.neg?.buckets
-  }
-
-  private parseAgg(Terms.Bucket agg) {
+  private Map parseAgg(Terms.Bucket agg) {
     List aggs = getAggs(agg)
     return [key: agg.key, count: agg.docCount, aggs: aggs ? aggs.collect { parseAgg(it) } : null]
   }
 
-  private TermsAggregationBuilder buildPOSAggToDepth(Integer depth, Integer size) {
+  private TermsAggregationBuilder buildAggToDepth(Integer depth, Integer size, String fieldA, String fieldB) {
     if( depth == 1) {
-      return buildPOSAgg(size)
+      return buildPOSAgg(size, fieldA)
     } else {
-      TermsAggregationBuilder termsAggregationBuilder = buildPOSAgg(size)
-      termsAggregationBuilder.subAggregation(buildPOSAggToDepth(depth-1, size))
-      termsAggregationBuilder.subAggregation(buildNegAggToDepth(depth-1, size))
+      TermsAggregationBuilder termsAggregationBuilder = buildPOSAgg(size, fieldA)
+      termsAggregationBuilder.subAggregation(buildAggToDepth(depth-1, size, fieldA, fieldB))
+      termsAggregationBuilder.subAggregation(buildAggToDepth(depth-1, size, fieldB, fieldA))
     }
   }
 
-  private TermsAggregationBuilder buildNegAggToDepth(Integer depth, Integer size) {
-    if( depth == 1) {
-      return buildNegAgg(size)
-    } else {
-      TermsAggregationBuilder termsAggregationBuilder = buildNegAgg(size)
-      termsAggregationBuilder.subAggregation(buildPOSAggToDepth(depth-1, size))
-      termsAggregationBuilder.subAggregation(buildNegAggToDepth(depth-1, size))
-    }
+  void findAggregations(List<String> with, List<String> without, Closure onComplete) {
+    BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+    with.each { queryBuilder.must(QueryBuilders.termQuery("positionOfSingle", it)) }
+    without.each { queryBuilder.must(QueryBuilders.termQuery("negative", it)) }
+    findAggregations(onComplete, (with.size() + without.size() == 0 ? QueryBuilders.matchAllQuery() : queryBuilder))
   }
 
-  void someBetterName(Closure onComplete, String a) {
-    QueryBuilder queryBuilder = QueryBuilders.termQuery("unique", a)
+  void findAggregations(Closure onComplete, QueryBuilder queryBuilder) {
     SearchResponse searchResponse = client.prepareSearch(index)
         .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
         .setQuery(queryBuilder)
-        .addAggregation(buildPOSAggToDepth(1, 10))
-        .addAggregation(buildNegAggToDepth(1, 10))
-        .setFrom(0).setSize(0)
+        .addAggregation(buildAggToDepth(2, 160, "positionOfSingle", "negative") )
+        .addAggregation(buildAggToDepth(2, 160, "negative", "positionOfSingle"))
+        .setFrom(0).setSize(10)
         .get()
 
+    int total = searchResponse.hits.totalHits
+    List words = searchResponse.hits.hits.collect{it.id}
     List aggs = getAggs(searchResponse).collect{ parseAgg(it) }
-    onComplete(aggs)
+    onComplete([total: total, words: words, aggs: aggs])
   }
 
   void setup(Closure onComplete) {

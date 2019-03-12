@@ -1,7 +1,5 @@
 package dulcinea
 
-import org.elasticsearch.index.query.QueryBuilder
-import org.elasticsearch.index.query.QueryBuilders
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.util.concurrent.BlockingVariable
@@ -30,17 +28,50 @@ class EsClientIntegSpec extends Specification {
     esClient.close()
   }
 
-  void "Aggregation"() {
+  void "All aggregation"() {
     given:
-
       Closure x = { result.set(it) }
 
-
     when:
-      esClient.someBetterName(x, "A")
+      esClient.findAggregations([], [], x)
 
     then:
-      result.get()
+      result.get().aggs.size() == 179
+  }
+
+  void "Aggregation with term"() {
+    given:
+      Closure x = { result.set(it) }
+
+    when:
+      esClient.findAggregations(["A1"], [], x)
+
+    then:
+      result.get().aggs.size() == 137
+  }
+
+  void "Aggregation without term"() {
+    given:
+      Closure x = { result.set(it) }
+
+    when:
+      esClient.findAggregations([], ["A"], x)
+
+    then:
+      result.get().aggs.size() == 171
+  }
+
+  void "All aggregation withAnalyser"() {
+    given:
+      Closure x = { result.set(it) }
+
+    when:
+      esClient.findAggregations([], [], x)
+
+    then:
+      Map groupedAggs = EsAggAnalyser.groupAggsByLetter(result.get().aggs, [])
+      Integer score = EsAggAnalyser.findMinScore(groupedAggs)
+      score == 1931
   }
 
   Closure setResult = {
