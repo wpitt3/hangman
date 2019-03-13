@@ -57,34 +57,6 @@ class EsClient {
     onComplete(x)
   }
 
-  private TermsAggregationBuilder buildPOSAgg(Integer size, String field) {
-    TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms(field).field(field)
-    termsAggregationBuilder.size(size)
-    return termsAggregationBuilder
-  }
-
-  //"positionOfSingle"
-  //negative
-
-  private List getAggs(def response) {
-    return (response.aggregations.asMap.positionOfSingle?.buckets ?: []) + (response.aggregations.asMap.negative?.buckets  ?: [])
-  }
-
-  private Map parseAgg(Terms.Bucket agg) {
-    List aggs = getAggs(agg)
-    return [key: agg.key, count: agg.docCount, aggs: aggs ? aggs.collect { parseAgg(it) } : null]
-  }
-
-  private TermsAggregationBuilder buildAggToDepth(Integer depth, Integer size, String fieldA, String fieldB) {
-    if( depth == 1) {
-      return buildPOSAgg(size, fieldA)
-    } else {
-      TermsAggregationBuilder termsAggregationBuilder = buildPOSAgg(size, fieldA)
-      termsAggregationBuilder.subAggregation(buildAggToDepth(depth-1, size, fieldA, fieldB))
-      termsAggregationBuilder.subAggregation(buildAggToDepth(depth-1, size, fieldB, fieldA))
-    }
-  }
-
   void findAggregations(List<String> with, List<String> without, Closure onComplete) {
     BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
     with.each { queryBuilder.must(QueryBuilders.termQuery("positionOfSingle", it)) }
@@ -105,6 +77,31 @@ class EsClient {
     List words = searchResponse.hits.hits.collect{it.id}
     List aggs = getAggs(searchResponse).collect{ parseAgg(it) }
     onComplete([total: total, words: words, aggs: aggs])
+  }
+
+  private TermsAggregationBuilder buildPOSAgg(Integer size, String field) {
+    TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms(field).field(field)
+    termsAggregationBuilder.size(size)
+    return termsAggregationBuilder
+  }
+
+  private List getAggs(def response) {
+    return (response.aggregations.asMap.positionOfSingle?.buckets ?: []) + (response.aggregations.asMap.negative?.buckets  ?: [])
+  }
+
+  private Map parseAgg(Terms.Bucket agg) {
+    List aggs = getAggs(agg)
+    return [key: agg.key, count: agg.docCount, aggs: aggs ? aggs.collect { parseAgg(it) } : null]
+  }
+
+  private TermsAggregationBuilder buildAggToDepth(Integer depth, Integer size, String fieldA, String fieldB) {
+    if( depth == 1) {
+      return buildPOSAgg(size, fieldA)
+    } else {
+      TermsAggregationBuilder termsAggregationBuilder = buildPOSAgg(size, fieldA)
+      termsAggregationBuilder.subAggregation(buildAggToDepth(depth-1, size, fieldA, fieldB))
+      termsAggregationBuilder.subAggregation(buildAggToDepth(depth-1, size, fieldB, fieldA))
+    }
   }
 
   void setup(Closure onComplete) {

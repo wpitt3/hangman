@@ -40,6 +40,27 @@ class EsClientSpec extends Specification {
           result.get().hits.collect{ it.id }.contains("MITTEN")
     }
 
+    void "Basic getWithAggregation"(){
+        when:
+          esClient.index(new Word("castle"), {
+              esClient.index(new Word("cattle"), {
+                  esClient.index(new Word("battle"), {
+                      esClient.index(new Word("mantle"), {
+                          esClient.findAggregations(["L4"], ["M"], setResult)
+                      })
+                  })
+              })
+          })
+
+        then:
+          result.get()
+          result.get().total == 3
+          result.get().aggs[0].key == "A1"
+          result.get().aggs[0].count == 3
+          result.get().aggs[0].aggs[1].key == "E5"
+          result.get().aggs[0].aggs[1].count == 3
+    }
+
     Closure setResult = {
         result.set(it)
     }

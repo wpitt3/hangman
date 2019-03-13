@@ -67,10 +67,12 @@ class EsClientIntegSpec extends Specification {
 
     when:
       esClient.findAggregations([], [], x)
-
-    then:
       Map groupedAggs = EsAggAnalyser.groupAggsByLetter(result.get().aggs, [])
       Integer score = EsAggAnalyser.findMinScore(groupedAggs)
+
+    then:
+      groupedAggs.count{ k,v -> v.size() == 7} == 24
+      groupedAggs.E.E.S.S == 1980
       score == 1931
   }
 

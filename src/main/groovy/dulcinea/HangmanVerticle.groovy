@@ -20,7 +20,6 @@ class HangmanVerticle extends AbstractVerticle {
         router.put("/game/:letter").handler(performTurn)
         router.get("/game/:letter").handler(performTurn)
         router.delete("/game").handler(removeTurn)
-//        router.get("/game").handler(getStatus)
 
         hangmanGame = new HangmanGame()
         hangmanGame.setup {
@@ -48,7 +47,7 @@ class HangmanVerticle extends AbstractVerticle {
                 req.response()
                     .setStatusCode(200)
                     .putHeader(CONTENT_TYPE, JSON_CONTENT)
-                    .end(response)
+                    .end('{ "result":"'+response+'"}')
             })
         } else [
             req.response()

@@ -19,6 +19,10 @@ class HangmanGame {
   }
 
   void addLetter(String letter, Closure onComplete) {
+    if ((with + without).contains(letter)){
+      onComplete(currentToString()); return
+    }
+
     List options =  (0..5).collect{ [with: (with.clone() + (letter + it)), without: without] }
     options += [with: with, without: without.clone() + letter]
     Map<Future, Map> futures = options.collectEntries{ [(buildFuture(it.with, it.without)) : it] }

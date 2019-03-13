@@ -30,10 +30,10 @@ class HangmanVerticleSpec extends Specification {
 
     def "Basic get"(){
         given:
-            Map expected = [status: 200, body: [:]]
+          Map expected = [status: 200, body: [result:"_ _ _ _ _ _   [A]"]]
 
         when:
-            Map response = call(rests.get, "/game", true, null)
+            Map response = call(rests.get, "/game/A", true, null)
 
         then:
             response == expected
@@ -52,10 +52,10 @@ class HangmanVerticleSpec extends Specification {
 
     def "Basic put"(){
         given:
-          Map expected = [status: 200]
+          Map expected = [status: 200, body: [result:"_ _ _ _ _ _   [A]"]]
 
         when:
-          Map response = call(rests.put, "/game", false, [:])
+          Map response = call(rests.put, "/game/A", true, [:])
 
         then:
           response == expected
@@ -84,7 +84,7 @@ class HangmanVerticleSpec extends Specification {
     }
 
     private Map call(Closure method, String uri, boolean responseBody, Map requestBody) {
-        BlockingVariable responseWithStatus = new BlockingVariable(1)
+        BlockingVariable responseWithStatus = new BlockingVariable(5)
         def handler = { ar ->
             if (ar.succeeded()) {
                 HttpResponse response = ar.result()
