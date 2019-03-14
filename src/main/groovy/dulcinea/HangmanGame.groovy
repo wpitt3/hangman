@@ -6,8 +6,8 @@ import io.vertx.core.Future
 class HangmanGame {
   EsClient client
 
-  List<String> with = []
-  List<String> without = []
+  List<Integer> with = []
+  List<Integer> without = []
 
   HangmanGame() {
 
@@ -19,12 +19,13 @@ class HangmanGame {
   }
 
   void addLetter(String letter, Closure onComplete) {
-    if ((with + without).contains(letter)){
+    Integer playerGuess = Word.letterToNum(letter)
+    if ((with + without).contains(playerGuess)){
       onComplete(currentToString()); return
     }
 
-    List options =  (0..5).collect{ [with: (with.clone() + (letter + it)), without: without] }
-    options += [with: with, without: without.clone() + letter]
+    List options =  (0..5).collect{ [with: (with.clone() + Word.positionToNum(letter + it)), without: without] }
+    options += [with: with, without: without.clone() + Word.positionToNum(letter)]
     Map<Future, Map> futures = options.collectEntries{ [(buildFuture(it.with, it.without)) : it] }
     CompositeFuture.all(futures.keySet().asList()).setHandler({ done ->
       if (done.succeeded()) {
@@ -32,9 +33,6 @@ class HangmanGame {
         Map winner = results.max{it.score}
         with = winner.with
         without = winner.without
-        println winner.words
-        println winner.total
-        println winner.bestLetter
         onComplete(currentToString())
       }
     })
@@ -43,7 +41,7 @@ class HangmanGame {
   private Future buildFuture(List with, List without) {
     Future<Map> future = Future.future()
     client.findAggregations(with, without, { Map result ->
-      Map groupedAggs = EsAggAnalyser.groupAggsByLetter(result.aggs, with.collect{it[0]})
+      Map groupedAggs = EsAggAnalyser.groupAggsByLetter(result.aggs, with.collect{Word.postionNumToLetterNum(it)})
       def score = result.aggs ? EsAggAnalyser.findValueForMinScore(groupedAggs) : null
       future.complete([
           total: result.total,
@@ -65,7 +63,7 @@ class HangmanGame {
 
   private String currentToString() {
     List toPrint = (0..5).collect{ "_"}
-    with.each{  toPrint[Integer.parseInt(it[1])] = it[0] }
-    return toPrint.join(" ") + "   " + without
+    with.collect{Word.numToPosition(it)}.each{  toPrint[Integer.parseInt(it[1])] = it[0] }
+    return toPrint.join(" ") + "   " + without.collect{Word.numToPosition(it)}
   }
 }

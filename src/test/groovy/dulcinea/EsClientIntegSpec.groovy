@@ -44,7 +44,7 @@ class EsClientIntegSpec extends Specification {
       Closure x = { result.set(it) }
 
     when:
-      esClient.findAggregations(["A1"], [], x)
+      esClient.findAggregations([Word.positionToNum("A1")], [], x)
 
     then:
       result.get().aggs.size() == 137
@@ -55,7 +55,7 @@ class EsClientIntegSpec extends Specification {
       Closure x = { result.set(it) }
 
     when:
-      esClient.findAggregations([], ["A"], x)
+      esClient.findAggregations([], [-Word.letterToNum("A")], x)
 
     then:
       result.get().aggs.size() == 171
@@ -72,8 +72,10 @@ class EsClientIntegSpec extends Specification {
 
     then:
       groupedAggs.count{ k,v -> v.size() == 7} == 24
-      groupedAggs.E.E.S.S == 1980
       score == 1931
+
+      groupedAggs[Word.letterToNum("E")][(long)Word.positionToNum("E")][Word.letterToNum("S")][(long)Word.positionToNum("S")] == 1980
+      groupedAggs[Word.letterToNum("E")][(long)Word.positionToNum("E1")][Word.letterToNum("S")][(long)Word.positionToNum("S2")] == 47
   }
 
   Closure setResult = {

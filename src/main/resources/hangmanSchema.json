@@ -11,23 +11,11 @@
         "include_in_all": false,
         "dynamic": "strict",
         "properties": {
-          "count": {
-            "type": "keyword"
-          },
           "negative": {
-            "type": "keyword"
-          },
-          "position": {
-            "type": "keyword"
+            "type": "short"
           },
           "positionOfSingle": {
-            "type": "keyword"
-          },
-          "unique": {
-            "type": "keyword"
-          },
-          "word": {
-            "type": "keyword"
+            "type": "short"
           }
         }
       }

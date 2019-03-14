@@ -5,7 +5,7 @@ class EsAggAnalyser {
   static Map groupAggsByLetter(List aggs, List ignoreLetters, List previousKeys = []) {
     return aggs.findAll{!previousKeys.contains(it.key)}.collectEntries{
       [(it.key): it.aggs ? groupAggsByLetter(it.aggs, ignoreLetters, previousKeys.clone() + it.key) : it.count]
-    }.groupBy{it.key[0]}
+    }.groupBy{Word.postionNumToLetterNum((int)it.key)}
         .findAll{!ignoreLetters.contains(it.key)}
   }
 

@@ -57,7 +57,7 @@ class EsClient {
     onComplete(x)
   }
 
-  void findAggregations(List<String> with, List<String> without, Closure onComplete) {
+  void findAggregations(List<Integer> with, List<Integer> without, Closure onComplete) {
     BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
     with.each { queryBuilder.must(QueryBuilders.termQuery("positionOfSingle", it)) }
     without.each { queryBuilder.must(QueryBuilders.termQuery("negative", it)) }
