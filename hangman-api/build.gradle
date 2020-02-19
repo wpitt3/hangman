@@ -14,7 +14,7 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'groovy'
 apply plugin: 'application'
-apply plugin: 'com.github.johnrengelman.shadow'
+//apply plugin: 'com.github.johnrengelman.shadow'
 
 sourceCompatibility = 8
 
@@ -50,10 +50,10 @@ sourceSets {
     }
 }
 
-shadowJar {
-    classifier = 'fat'
-    manifest {
-        attributes "Main-Verticle": 'groovy:dulcinea.HangmanVerticle'
-    }
-}
+//shadowJar {
+//    classifier = 'fat'
+//    manifest {
+//        attributes "Main-Verticle": 'groovy:dulcinea.HangmanVerticle'
+//    }
+//}
 

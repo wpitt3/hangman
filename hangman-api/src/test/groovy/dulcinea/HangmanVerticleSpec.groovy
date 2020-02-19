@@ -1,4 +1,6 @@
-import dulcinea.HangmanVerticle
+package dulcinea
+
+
 import io.vertx.core.Vertx
 import io.vertx.ext.web.client.HttpResponse
 import io.vertx.ext.web.client.WebClient

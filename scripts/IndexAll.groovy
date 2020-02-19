@@ -1,6 +1,6 @@
 package dulcinea
 
-import spock.util.concurrent.BlockingVariable
+import BlockingVariable
 
 BlockingVariable deployed = new BlockingVariable(10)
 
