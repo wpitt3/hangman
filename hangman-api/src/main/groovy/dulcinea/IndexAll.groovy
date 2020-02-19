@@ -1,14 +1,14 @@
 package dulcinea
-
-import BlockingVariable
-
-BlockingVariable deployed = new BlockingVariable(10)
+//
+//import BlockingVariable
+//
+//BlockingVariable deployed = new BlockingVariable(10)
 
 EsClient esClient = new EsClient("hangman")
-esClient.setup {
-  deployed.set(true)
-}
-assert deployed.get()
+//esClient.setup {
+//  deployed.set(true)
+//}
+//assert deployed.get()
 
 List sixLetterWords = new File(getClass().getResource('/6letterwords.txt').toURI()).readLines()
 
