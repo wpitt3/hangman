@@ -1,6 +1,5 @@
 package dulcinea.hangman
 
-import org.assertj.core.api.Assertions
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test

@@ -1,11 +1,17 @@
 package dulcinea.hangman
 
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
+import org.springframework.stereotype.Service
+import org.springframework.web.bind.annotation.PathVariable
 
-@SpringBootApplication
-class HangmanService
 
-fun main(args: Array<String>) {
-	runApplication<HangmanService>(*args)
+@Service
+class HangmanService {
+
+    fun getStatus() : GameStatus {
+        return GameStatus("___A__", listOf("E"))
+    }
+
+    fun makeGuess(@PathVariable letter: String) : GameStatus {
+        return GameStatus("___R__", listOf("F"))
+    }
 }

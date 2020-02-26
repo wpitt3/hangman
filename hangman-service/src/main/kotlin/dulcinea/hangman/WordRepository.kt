@@ -38,9 +38,7 @@ class WordRepository(val index: String, port: Int, host: String) {
         client.admin().indices().preparePutMapping(index)
                 .setType("_doc")
                 .setSource(source, XContentType.JSON)
-                .get();
-
-
+                .get()
     }
 
     fun create(word: Word) {
