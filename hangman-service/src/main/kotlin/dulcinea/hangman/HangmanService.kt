@@ -1,12 +1,11 @@
 package dulcinea.hangman
 
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.PathVariable
 
 @Service
-class HangmanService(val wordRepository: WordRepository) {
+class HangmanService(val wordRepository: WordRepository, val resultAnalyser: ResultAnalyser) {
 
-    val inputRegex = "^[a-zA-Z]$".toRegex()
+    val inputRegex = "^[A-Z]$".toRegex()
 
     var with: MutableList<String> = (0..5).map{""}.toMutableList()
     var without: MutableList<String> = mutableListOf()
@@ -17,21 +16,31 @@ class HangmanService(val wordRepository: WordRepository) {
     }
 
     fun getStatus() : GameStatus {
-        val state = with.map{ if (it=="") "_" else it}.joinToString("")
+        val state = with.map{if (it=="") "_" else it}.joinToString("")
         return GameStatus(state, without)
     }
 
-    fun makeGuess(@PathVariable letter: String) : GameStatus {
-        if (letter.length != 1 || !inputRegex.matches(letter) || (with + without).contains(letter)){
+    fun makeGuess(letter: String) : GameStatus {
+        val upperCaseLetter = letter.toUpperCase()
+        if (upperCaseLetter.length != 1 || !inputRegex.matches(upperCaseLetter) || (with + without).contains(upperCaseLetter)){
             return getStatus()
         }
-        val options = (0..5).map{ mapOf(Pair("with", (with.toMutableList() + (letter + it))), Pair("without", without.toList())) }.toMutableList()
-        options.add(mapOf(Pair("with", with.toList()), Pair("without", without.toMutableList() + letter)))
+        val options = (0..5).filter{with[it] == ""}
+                .map{ SearchOption(listOf(upperCaseLetter + it), listOf()) }
+                .toMutableList() + SearchOption(listOf(), listOf(upperCaseLetter))
 
-        options.forEach {
-            wordRepository.findAggregations(it["with"]!!, it["without"]!!)
-        }
+        val searchOption = options.map {
+            val result = wordRepository.findAggregations((indexedLetters() + it.with), (without + it.without))
+            Pair(resultAnalyser.score(result), it)
+        }//.sortedBy { it.first }.first().second
+
 
         return getStatus()
     }
+
+    private fun indexedLetters(): MutableList<String> {
+        return (0..5).filter{with[it] != ""}.map{"${with[it]}${it}"}.toMutableList()
+    }
 }
+
+data class SearchOption(val with: List<String>, val without: List<String>)

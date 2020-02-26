@@ -31,6 +31,8 @@ class GameControllerTest {
     fun `can create a new game`() {
         mockMvc.perform(MockMvcRequestBuilders.post("/game"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
+
+        Mockito.verify(hangmanService, Mockito.times(1)).newGame()
     }
 
     @Test
