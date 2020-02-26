@@ -1,8 +1,7 @@
 package dulcinea.hangman
 
 
-data class Word(var input: String) {
-    val word: String
+data class Word(var word: String) {
     val position: List<String>
     val unique: List<String>
     val count: List<String>
@@ -10,8 +9,8 @@ data class Word(var input: String) {
     val negative: List<String>
 
     init {
-        val letters = input.toUpperCase().toCharArray().map { it.toString() }
-        word = input.toUpperCase()
+        val letters = word.toUpperCase().toCharArray().map { it.toString() }
+        word = word.toUpperCase()
         unique = letters.toSet().toList()
         position = (0..(letters.size - 1)).map{"${letters[it]}$it"}
         count = unique.map{ letter -> "${letters.count { it == letter }}$letter"}

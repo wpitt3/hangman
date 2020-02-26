@@ -3,10 +3,8 @@ package dulcinea.hangman
 import com.google.gson.Gson
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.action.delete.DeleteRequest
-import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchType
-import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
@@ -33,7 +31,21 @@ class WordRepository(val index: String, port: Int, host: String) {
                 .addTransportAddress(TransportAddress(InetAddress.getByName(host), port))
     }
 
+    fun setupIndex() {
+        client.admin().indices().prepareCreate(index).setSettings(Settings.builder().put("index.refresh_interval", "5s")).get()
+        val source = "{\"_doc\":{\"include_in_all\":false,\"dynamic\":\"strict\",\"properties\":{\"count\":{\"type\":\"keyword\"},\"negative\":{\"type\":\"keyword\"},\"position\":{\"type\":\"keyword\"},\"positionOfSingle\":{\"type\":\"keyword\"},\"unique\":{\"type\":\"keyword\"},\"word\":{\"type\":\"keyword\"}}}}"
+
+        client.admin().indices().preparePutMapping(index)
+                .setType("_doc")
+                .setSource(source, XContentType.JSON)
+                .get();
+
+
+    }
+
     fun create(word: Word) {
+        println(gson.toJson(word))
+
         client.prepareIndex(index, "_doc", word.word)
                 .setSource(gson.toJson(word), XContentType.JSON).get()
     }
