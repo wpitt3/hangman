@@ -18,6 +18,7 @@ class GameController(val hangmanService: HangmanService) {
 
     @PostMapping
     fun start() : String {
+        hangmanService.newGame()
         return "New game started"
     }
 }

@@ -5,15 +5,15 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.assertj.core.api.Assertions.assertThat
 
-class WordRepositoryTest: ElasticsearchWrapper() {
+class EsWordRepositoryTest: ElasticsearchWrapper() {
 
     companion object {
-        lateinit var repo: WordRepository
+        lateinit var repo: EsWordRepository
 
         @BeforeClass @JvmStatic fun setup() {
             elasticsearchContainer.start()
             val address = elasticsearchContainer.tcpHost.toString().split(":")
-            repo = WordRepository("hangman", "localhost", address[1].toInt())
+            repo = EsWordRepository(EsProps("hangman", "localhost", address[1].toInt()))
             repo.setupIndex()
             repo.create(Word("ADJURE"))
             repo.create(Word("BADGER"))
