@@ -13,7 +13,7 @@ class WordRepositoryTest: ElasticsearchWrapper() {
         @BeforeClass @JvmStatic fun setup() {
             elasticsearchContainer.start()
             val address = elasticsearchContainer.tcpHost.toString().split(":")
-            repo = WordRepository("hangman", address[1].toInt(), "localhost")
+            repo = WordRepository("hangman", "localhost", address[1].toInt())
             repo.setupIndex()
             repo.create(Word("ADJURE"))
             repo.create(Word("BADGER"))

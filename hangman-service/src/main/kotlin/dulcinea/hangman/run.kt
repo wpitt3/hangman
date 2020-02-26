@@ -1,9 +1,9 @@
 package dulcinea.hangman
 //
 //
-//val wordRepo: WordRepository = WordRepository("hangman", 9300, "localhost")
+val wordRepo: WordRepository = WordRepository("hangman","localhost", 9300)
 //
-//fun main(args: Array<String>) {
+fun main(args: Array<String>) {
 ////    wordRepo.get().forEach{
 ////        println(it.word)
 ////        println(it.count)
@@ -12,5 +12,8 @@ package dulcinea.hangman
 //
 //    x
 //
-//}
+    wordRepo.setupIndex()
+    val indexPopulator = IndexPopulator(wordRepo)
+    indexPopulator.populateRepo()
+}
 

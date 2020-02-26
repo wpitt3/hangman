@@ -20,7 +20,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 
 import java.net.InetAddress
 
-class WordRepository(val index: String, port: Int, host: String) {
+class WordRepository(val index: String, host: String, port: Int) {
 
     private val client: TransportClient
     private val gson = Gson()
