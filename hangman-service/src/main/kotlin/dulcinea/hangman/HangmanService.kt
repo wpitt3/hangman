@@ -4,8 +4,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class HangmanService(val wordRepository: WordRepository, val resultAnalyser: ResultAnalyser) {
-
-    val inputRegex = "^[A-Z]$".toRegex()
+    private final val INPUT_REGEX = "^[A-Z]$".toRegex()
 
     var with: MutableList<String> = (0..5).map{""}.toMutableList()
     var without: MutableList<String> = mutableListOf()
@@ -22,7 +21,7 @@ class HangmanService(val wordRepository: WordRepository, val resultAnalyser: Res
 
     fun makeGuess(letter: String) : GameStatus {
         val upperCaseLetter = letter.toUpperCase()
-        if (upperCaseLetter.length != 1 || !inputRegex.matches(upperCaseLetter) || (with + without).contains(upperCaseLetter)){
+        if (upperCaseLetter.length != 1 || !INPUT_REGEX.matches(upperCaseLetter) || (with + without).contains(upperCaseLetter)){
             return getStatus()
         }
         val options = (0..5).filter{with[it] == ""}

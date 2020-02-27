@@ -48,8 +48,6 @@ class EsWordRepository(properties: EsProps): WordRepository {
     }
 
     override fun create(word: Word) {
-        println(gson.toJson(word))
-
         client.prepareIndex(index, "_doc", word.word)
                 .setSource(gson.toJson(word), XContentType.JSON).get()
     }

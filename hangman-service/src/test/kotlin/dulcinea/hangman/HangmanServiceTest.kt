@@ -134,7 +134,7 @@ class HangmanServiceTest {
 
     private fun mockResultAnalyserToResultTotal() {
         `when`(resultAnalyser.score(any(Result::class.java))).thenAnswer( Answer {
-            val x = it.arguments[0]; if (x is Result) x.total else 0
+            val x = it.arguments[0]; if (x is Result) x.total.toLong() else 0L
         })
     }
 

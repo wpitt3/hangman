@@ -12,8 +12,6 @@ runs on port `8080`
 
 
 TODO:
-result analyser + tests
-
 initialise repo with 'script' on startup
 
 configureable word length, depth and dictionary
