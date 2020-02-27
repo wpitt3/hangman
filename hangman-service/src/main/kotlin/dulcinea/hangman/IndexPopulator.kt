@@ -5,7 +5,7 @@ import java.io.File
 class IndexPopulator(val wordRepository: WordRepository) {
 
     fun populateRepo() {
-        val words: List<String> = File("src/main/resources/six_letter_words.txt").readLines()
+        val words: List<String> = File("src/main/resources/six_letter_words.txt").readLines() //TODO configurable
         words.forEach {
             wordRepository.create(Word(it))
         }

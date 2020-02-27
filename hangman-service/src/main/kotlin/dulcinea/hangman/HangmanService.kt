@@ -8,6 +8,28 @@ class HangmanService(val wordRepository: WordRepository, val resultAnalyser: Res
 
     var with: MutableList<String> = (0..5).map{""}.toMutableList()
     var without: MutableList<String> = mutableListOf()
+    var status: PersistenceStatus = PersistenceStatus.DOWN
+
+    init {
+        Thread {setup(wordRepository)}.start()
+    }
+
+    private fun setup(wordRepository: WordRepository) {
+        var words: List<Word> = listOf()
+        try {
+            words = wordRepository.get()
+        } catch (e: Exception) {
+            println("Setting up index")
+            wordRepository.setupIndex()
+        }
+        status = PersistenceStatus.INITIALISEING
+        if (words.isEmpty()) {
+            println("Indexing words")
+            IndexPopulator(wordRepository).populateRepo()
+            println("Initialised")
+        }
+        status = PersistenceStatus.READY
+    }
 
     fun newGame() {
         with = (0..5).map{""}.toMutableList()
@@ -51,3 +73,4 @@ class HangmanService(val wordRepository: WordRepository, val resultAnalyser: Res
 }
 
 data class SearchOption(val with: List<String>, val without: List<String>)
+enum class PersistenceStatus{ DOWN, INITIALISEING, READY}

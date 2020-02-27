@@ -11,7 +11,6 @@ import org.elasticsearch.index.query.QueryBuilders
 interface WordRepository {
     fun setupIndex()
     fun create(word: Word)
-    fun delete(word: String)
     fun get(): List<Word>
     fun refresh()
     fun findAggregations(with: List<String>, without: List<String>): Result

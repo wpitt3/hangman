@@ -2,10 +2,8 @@ package dulcinea.hangman
 
 import com.google.gson.Gson
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
-import org.elasticsearch.action.delete.DeleteRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchType
-import org.elasticsearch.transport.client.PreBuiltTransportClient
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.TransportAddress
@@ -17,16 +15,20 @@ import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder
-import org.springframework.stereotype.Repository
+import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.elasticsearch.transport.client.PreBuiltTransportClient
 
+import org.springframework.stereotype.Repository
 import java.net.InetAddress
+
 
 @Repository
 class EsWordRepository(properties: EsProps): WordRepository {
-
     val index: String = properties.index
     val host: String = properties.host
     val port: Int = properties.port
+    val depth: Int = 2
+    val size: Int = 160
 
     private val client: TransportClient
     private val gson = Gson()
@@ -52,22 +54,18 @@ class EsWordRepository(properties: EsProps): WordRepository {
                 .setSource(gson.toJson(word), XContentType.JSON).get()
     }
 
-    override fun delete(word: String) {
-        client.delete(DeleteRequest(index, "_doc", word)).get()
+    override fun refresh() {
+        client.admin().indices().refresh(RefreshRequest(index)).get()
     }
 
     override fun get(): List<Word> {
         val response: SearchResponse = client.prepareSearch(index)
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                 .setQuery(QueryBuilders.matchAllQuery())
-                .setFrom(0).setSize(60)
+                .setFrom(0).setSize(10)
                 .get()
 
         return response.hits.map { gson.fromJson(it.sourceAsString, Word::class.java) }
-    }
-
-    override fun refresh() {
-        client.admin().indices().refresh(RefreshRequest(index)).get()
     }
 
     override fun findAggregations(with: List<String>, without: List<String>): Result {
@@ -85,8 +83,8 @@ class EsWordRepository(properties: EsProps): WordRepository {
         val searchResponse: SearchResponse = client.prepareSearch(index)
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                 .setQuery(queryBuilder)
-                .addAggregation(buildAggToDepth(2, 160, "positionOfSingle", "negative"))
-                .addAggregation(buildAggToDepth(2, 160, "negative", "positionOfSingle"))
+                .addAggregation(buildAggToDepth(depth, size, "positionOfSingle", "negative"))
+                .addAggregation(buildAggToDepth(depth, size, "negative", "positionOfSingle"))
                 .setFrom(0).setSize(10)
                 .get()
 

@@ -11,7 +11,7 @@ class ResultAnalyser {
 
     private fun recurse(aggs: List<Result.AggResult>): Long {
         return if (aggs[0].aggs.isEmpty()) {
-            aggs.map { it.count.toLong() }.min()!!
+            aggs.map { it.count }.min()!!
         } else {
             aggs.map { recurse(it.aggs) }.max()!!
         }
