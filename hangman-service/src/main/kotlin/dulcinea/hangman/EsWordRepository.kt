@@ -97,7 +97,6 @@ class EsWordRepository(properties: EsProps): WordRepository {
         val aggs = getAggs(searchResponse.aggregations.asMap).map{ parseAgg(it) }
         return Result(total, words, aggs)
     }
-//
 
     private fun getAggs(aggregations: Map<String, Aggregation>): List<StringTerms.Bucket> {
         return getAgg(aggregations, "positionOfSingle") + getAgg(aggregations, "negative")
@@ -111,9 +110,9 @@ class EsWordRepository(properties: EsProps): WordRepository {
         return listOf()
     }
 
-    private fun parseAgg(agg: Terms.Bucket): AggResult {
+    private fun parseAgg(agg: Terms.Bucket): Result.AggResult {
         val aggs = getAggs(agg.aggregations.asMap)
-        return AggResult(agg.key.toString(), agg.docCount, if (aggs.isNotEmpty()) aggs.map { parseAgg(it) } else listOf())
+        return Result.AggResult(agg.key.toString(), agg.docCount, if (aggs.isNotEmpty()) aggs.map { parseAgg(it) } else listOf())
     }
 
     private fun buildAggToDepth(depth: Int, size: Int, fieldA: String, fieldB: String): TermsAggregationBuilder {

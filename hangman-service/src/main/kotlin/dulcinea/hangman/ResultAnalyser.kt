@@ -1,7 +1,10 @@
 package dulcinea.hangman
 
-open class ResultAnalyser {
+import org.springframework.stereotype.Service
 
+
+@Service
+class ResultAnalyser {
     fun score(result: Result): Int {
         return result.total
     }

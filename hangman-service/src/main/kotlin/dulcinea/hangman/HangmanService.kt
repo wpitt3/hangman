@@ -34,7 +34,6 @@ class HangmanService(val wordRepository: WordRepository, val resultAnalyser: Res
             Pair(resultAnalyser.score(result), it)
         }.sortedBy { -it.first }.first().second
 
-        println(searchOption)
         updateStateWithOption(searchOption)
 
         return getStatus()

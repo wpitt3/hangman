@@ -1,27 +1,25 @@
 # Hangman game
 
 ## To build
-install gradle 4.1
+mvn clean install
 
-run `gradle clean shadowJar`
 
 ## To run
-install vertx 3.5.1
 
-run `gradle runShadow`
+mvn spring-boot:run
 
 runs on port `8080`
 
 
-
 TODO:
+result analyser + tests
 
-Repos tests to use docker image
-Vertx tests to use mock
+initialise repo with 'script' on startup
 
-script to populate is in bash
+configureable word length, depth and dictionary
 
 docker image to populate es image
 
 docker compose 
 
+different persistence layer
