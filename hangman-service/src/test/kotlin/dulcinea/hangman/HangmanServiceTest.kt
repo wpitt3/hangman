@@ -5,10 +5,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatcher
 
 import org.mockito.ArgumentMatchers.anyList
+import org.mockito.Mockito
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.stubbing.Answer
 
 @RunWith(MockitoJUnitRunner::class)
 class HangmanServiceTest {
@@ -75,7 +78,7 @@ class HangmanServiceTest {
     @Test
     fun `make guesses calls wordRepository`() {
         `when`(wordRepository.findAggregations(anyList(), anyList())).thenReturn(Result(0, listOf(), listOf()))
-//        `when`(resultAnalyser.score(any(Result::class.java))).thenReturn(1)
+        `when`(resultAnalyser.score(any(Result::class.java))).thenReturn(1)
 
         hangmanService.makeGuess("A")
 
@@ -92,7 +95,7 @@ class HangmanServiceTest {
     fun `make guesses calls wordRepository with existing letter`() {
         hangmanService.with[0] = "B"
         `when`(wordRepository.findAggregations(anyList(), anyList())).thenReturn(Result(0, listOf(), listOf()))
-//        `when`(resultAnalyser.score(any(Result::class.java))).thenReturn(1)
+        `when`(resultAnalyser.score(any(Result::class.java))).thenReturn(1)
 
         hangmanService.makeGuess("A")
 
@@ -104,4 +107,37 @@ class HangmanServiceTest {
         verify(wordRepository, times(1)).findAggregations(listOf("B0", "A5"), listOf())
         verify(wordRepository, times(1)).findAggregations(listOf("B0"), listOf("A"))
     }
+
+    @Test
+    fun `update state with selected letter position`() {
+        `when`(wordRepository.findAggregations(anyList(), anyList())).thenReturn(Result(0, listOf(), listOf()))
+        `when`(wordRepository.findAggregations(eq(listOf("A2")), anyList())).thenReturn(Result(1, listOf(), listOf()))
+
+        mockResultAnalyserToResultTotal()
+
+        hangmanService.makeGuess("A")
+
+        assertThat(hangmanService.getStatus()).isEqualTo(GameStatus("__A___", listOf()))
+    }
+
+    @Test
+    fun `update state with non selected letter`() {
+        `when`(wordRepository.findAggregations(anyList(), eq(listOf()))).thenReturn(Result(0, listOf(), listOf()))
+        `when`(wordRepository.findAggregations(anyList(), eq(listOf("A")))).thenReturn(Result(1, listOf(), listOf()))
+
+        mockResultAnalyserToResultTotal()
+
+        hangmanService.makeGuess("A")
+
+        assertThat(hangmanService.getStatus()).isEqualTo(GameStatus("______", listOf("A")))
+    }
+
+    private fun mockResultAnalyserToResultTotal() {
+        `when`(resultAnalyser.score(any(Result::class.java))).thenAnswer( Answer {
+            val x = it.arguments[0]; if (x is Result) x.total else 0
+        })
+    }
+
+    private fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
+    private fun <T> eq(value: T): T = Mockito.eq(value)
 }

@@ -32,10 +32,19 @@ class HangmanService(val wordRepository: WordRepository, val resultAnalyser: Res
         val searchOption = options.map {
             val result = wordRepository.findAggregations((indexedLetters() + it.with), (without + it.without))
             Pair(resultAnalyser.score(result), it)
-        }//.sortedBy { it.first }.first().second
+        }.sortedBy { -it.first }.first().second
 
+        println(searchOption)
+        updateStateWithOption(searchOption)
 
         return getStatus()
+    }
+
+    private fun updateStateWithOption(searchOption: SearchOption) {
+        without.addAll(searchOption.without)
+        searchOption.with.forEach{
+            with[it[1].toString().toInt()] = it[0].toString()
+        }
     }
 
     private fun indexedLetters(): MutableList<String> {
