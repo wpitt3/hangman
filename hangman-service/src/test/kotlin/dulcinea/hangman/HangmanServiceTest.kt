@@ -78,7 +78,7 @@ class HangmanServiceTest {
     @Test
     fun `make guesses calls wordRepository`() {
         `when`(wordRepository.findAggregations(anyList(), anyList())).thenReturn(Result(0, listOf(), listOf()))
-        `when`(resultAnalyser.score(any(Result::class.java))).thenReturn(1)
+        `when`(resultAnalyser.score(any(Result::class.java), anyList())).thenReturn(1)
 
         hangmanService.makeGuess("A")
 
@@ -95,7 +95,7 @@ class HangmanServiceTest {
     fun `make guesses calls wordRepository with existing letter`() {
         hangmanService.with[0] = "B"
         `when`(wordRepository.findAggregations(anyList(), anyList())).thenReturn(Result(0, listOf(), listOf()))
-        `when`(resultAnalyser.score(any(Result::class.java))).thenReturn(1)
+        `when`(resultAnalyser.score(any(Result::class.java), anyList())).thenReturn(1)
 
         hangmanService.makeGuess("A")
 
@@ -133,7 +133,7 @@ class HangmanServiceTest {
     }
 
     private fun mockResultAnalyserToResultTotal() {
-        `when`(resultAnalyser.score(any(Result::class.java))).thenAnswer( Answer {
+        `when`(resultAnalyser.score(any(Result::class.java), anyList())).thenAnswer( Answer {
             val x = it.arguments[0]; if (x is Result) x.total.toLong() else 0L
         })
     }
