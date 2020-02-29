@@ -5,15 +5,23 @@ import org.springframework.stereotype.Service
 
 @Service
 class EsResultAnalyser {
-    fun score(result: EsResult, searchTerm: List<String>): Long {
-        return recurse(result.aggs, searchTerm)
+    fun score(result: EsResult, seenLetters: List<String>): Long {
+        return recurse(result.aggs, seenLetters.map{it[0]})
     }
 
-    private fun recurse(aggs: List<EsResult.AggResult>, termsSeen: List<String>): Long {
+    private fun recurse(aggs: List<EsResult.AggResult>, seenLetters: List<Char>): Long {
         return if (aggs[0].aggs.isEmpty()) {
-            aggs.filter{ !termsSeen.contains(it.key) }.map { it.count }.min()!!
+            x(aggs, seenLetters).map { (letter, aggs) ->
+                aggs.map{it.count}.max()!!
+            }.min()!!
         } else {
-            aggs.filter{ !termsSeen.contains(it.key) }.map { recurse(it.aggs, termsSeen + it.key) }.max()!!
+            x(aggs, seenLetters).map{ (letter, aggs) ->
+                aggs.map{recurse(it.aggs, seenLetters + letter)}.max()!!
+            }.min()!!
         }
+    }
+
+    private fun x(aggs: List<EsResult.AggResult>, seenLetters: List<Char>): Map<Char, List<EsResult.AggResult>> {
+        return aggs.groupBy { it.key[0] }.filter{ !seenLetters.contains(it.key)}
     }
 }
