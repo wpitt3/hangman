@@ -36,9 +36,10 @@ class EsHangmanService(val wordRepository: EsWordRepository, val resultAnalyser:
 
         val searchOption = options.map {
             val result = wordRepository.findAggregations((indexedLetters(with) + it.with), (without + it.without))
+            println(result.words)
             Pair(resultAnalyser.score(result, it.with + it.without), it)
-        }.sortedBy { println(it); -it.first }.first().second
-
+        }.sortedBy { -it.first }.first().second
+        println(searchOption)
         return searchOption
     }
 

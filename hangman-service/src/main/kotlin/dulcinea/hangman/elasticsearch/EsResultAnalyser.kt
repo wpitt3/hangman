@@ -10,6 +10,9 @@ class EsResultAnalyser {
     }
 
     private fun recurse(aggs: List<EsResult.AggResult>, seenLetters: List<Char>): Long {
+        if (aggs.isEmpty()) {
+            return 0L
+        }
         return if (aggs[0].aggs.isEmpty()) {
             x(aggs, seenLetters).map { (letter, aggs) ->
                 aggs.map{it.count}.max()!!

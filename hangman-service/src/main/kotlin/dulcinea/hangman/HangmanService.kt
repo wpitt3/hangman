@@ -27,6 +27,7 @@ class HangmanService(val esHangmanService: EsHangmanService) {
         }
 
         val searchOption = esHangmanService.makeGuess(letter, with, without)
+
         updateStateWithOption(searchOption)
         return getStatus()
     }
