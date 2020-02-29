@@ -1,11 +1,13 @@
 package dulcinea.hangman
 
 
+import dulcinea.hangman.esrepo.EsHangmanService
+import dulcinea.hangman.esrepo.EsResult
+import dulcinea.hangman.esrepo.EsResultAnalyser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatcher
 
 import org.mockito.ArgumentMatchers.anyList
 import org.mockito.Mockito
@@ -17,12 +19,12 @@ import org.mockito.stubbing.Answer
 class HangmanServiceTest {
 
     var wordRepository: WordRepository = mock(WordRepository::class.java)
-    var resultAnalyser: ResultAnalyser = mock(ResultAnalyser::class.java)
+    var resultAnalyser: EsResultAnalyser = mock(EsResultAnalyser::class.java)
     lateinit var hangmanService: HangmanService
 
     @Before
     fun setup() {
-        hangmanService = HangmanService(wordRepository, resultAnalyser)
+        hangmanService = HangmanService(EsHangmanService(wordRepository, resultAnalyser))
     }
 
     @Test
@@ -77,8 +79,8 @@ class HangmanServiceTest {
 
     @Test
     fun `make guesses calls wordRepository`() {
-        `when`(wordRepository.findAggregations(anyList(), anyList())).thenReturn(Result(0, listOf(), listOf()))
-        `when`(resultAnalyser.score(any(Result::class.java), anyList())).thenReturn(1)
+        `when`(wordRepository.findAggregations(anyList(), anyList())).thenReturn(EsResult(0, listOf(), listOf()))
+        `when`(resultAnalyser.score(any(EsResult::class.java), anyList())).thenReturn(1)
 
         hangmanService.makeGuess("A")
 
@@ -94,8 +96,8 @@ class HangmanServiceTest {
     @Test
     fun `make guesses calls wordRepository with existing letter`() {
         hangmanService.with[0] = "B"
-        `when`(wordRepository.findAggregations(anyList(), anyList())).thenReturn(Result(0, listOf(), listOf()))
-        `when`(resultAnalyser.score(any(Result::class.java), anyList())).thenReturn(1)
+        `when`(wordRepository.findAggregations(anyList(), anyList())).thenReturn(EsResult(0, listOf(), listOf()))
+        `when`(resultAnalyser.score(any(EsResult::class.java), anyList())).thenReturn(1)
 
         hangmanService.makeGuess("A")
 
@@ -110,8 +112,8 @@ class HangmanServiceTest {
 
     @Test
     fun `update state with selected letter position`() {
-        `when`(wordRepository.findAggregations(anyList(), anyList())).thenReturn(Result(0, listOf(), listOf()))
-        `when`(wordRepository.findAggregations(eq(listOf("A2")), anyList())).thenReturn(Result(1, listOf(), listOf()))
+        `when`(wordRepository.findAggregations(anyList(), anyList())).thenReturn(EsResult(0, listOf(), listOf()))
+        `when`(wordRepository.findAggregations(eq(listOf("A2")), anyList())).thenReturn(EsResult(1, listOf(), listOf()))
 
         mockResultAnalyserToResultTotal()
 
@@ -122,8 +124,8 @@ class HangmanServiceTest {
 
     @Test
     fun `update state with non selected letter`() {
-        `when`(wordRepository.findAggregations(anyList(), eq(listOf()))).thenReturn(Result(0, listOf(), listOf()))
-        `when`(wordRepository.findAggregations(anyList(), eq(listOf("A")))).thenReturn(Result(1, listOf(), listOf()))
+        `when`(wordRepository.findAggregations(anyList(), eq(listOf()))).thenReturn(EsResult(0, listOf(), listOf()))
+        `when`(wordRepository.findAggregations(anyList(), eq(listOf("A")))).thenReturn(EsResult(1, listOf(), listOf()))
 
         mockResultAnalyserToResultTotal()
 
@@ -133,8 +135,8 @@ class HangmanServiceTest {
     }
 
     private fun mockResultAnalyserToResultTotal() {
-        `when`(resultAnalyser.score(any(Result::class.java), anyList())).thenAnswer( Answer {
-            val x = it.arguments[0]; if (x is Result) x.total.toLong() else 0L
+        `when`(resultAnalyser.score(any(EsResult::class.java), anyList())).thenAnswer( Answer {
+            val x = it.arguments[0]; if (x is EsResult) x.total.toLong() else 0L
         })
     }
 

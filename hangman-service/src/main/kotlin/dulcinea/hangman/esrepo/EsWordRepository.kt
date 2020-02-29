@@ -1,6 +1,8 @@
-package dulcinea.hangman
+package dulcinea.hangman.esrepo
 
 import com.google.gson.Gson
+import dulcinea.hangman.Word
+import dulcinea.hangman.WordRepository
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchType
@@ -15,7 +17,6 @@ import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder
-import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 
 import org.springframework.stereotype.Repository
@@ -68,7 +69,7 @@ class EsWordRepository(properties: EsProps): WordRepository {
         return response.hits.map { gson.fromJson(it.sourceAsString, Word::class.java) }
     }
 
-    override fun findAggregations(with: List<String>, without: List<String>): Result {
+    override fun findAggregations(with: List<String>, without: List<String>): EsResult {
         return findAggregations(createQueryBuilder(with, without))
     }
 
@@ -79,7 +80,7 @@ class EsWordRepository(properties: EsProps): WordRepository {
         return if (with.size + without.size == 0) QueryBuilders.matchAllQuery() else queryBuilder
     }
 
-    private fun findAggregations(queryBuilder: QueryBuilder): Result {
+    private fun findAggregations(queryBuilder: QueryBuilder): EsResult {
         val searchResponse: SearchResponse = client.prepareSearch(index)
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                 .setQuery(queryBuilder)
@@ -91,7 +92,7 @@ class EsWordRepository(properties: EsProps): WordRepository {
         val total: Int = searchResponse.hits.totalHits.toInt()
         val words = searchResponse.hits.hits.map { it.id }
         val aggs = getAggs(searchResponse.aggregations.asMap).map{ parseAgg(it) }
-        return Result(total, words, aggs)
+        return EsResult(total, words, aggs)
     }
 
     private fun getAggs(aggregations: Map<String, Aggregation>): List<StringTerms.Bucket> {
@@ -106,9 +107,9 @@ class EsWordRepository(properties: EsProps): WordRepository {
         return listOf()
     }
 
-    private fun parseAgg(agg: Terms.Bucket): Result.AggResult {
+    private fun parseAgg(agg: Terms.Bucket): EsResult.AggResult {
         val aggs = getAggs(agg.aggregations.asMap)
-        return Result.AggResult(agg.key.toString(), agg.docCount, if (aggs.isNotEmpty()) aggs.map { parseAgg(it) } else listOf())
+        return EsResult.AggResult(agg.key.toString(), agg.docCount, if (aggs.isNotEmpty()) aggs.map { parseAgg(it) } else listOf())
     }
 
     private fun buildAggToDepth(depth: Int, size: Int, fieldA: String, fieldB: String): TermsAggregationBuilder {
