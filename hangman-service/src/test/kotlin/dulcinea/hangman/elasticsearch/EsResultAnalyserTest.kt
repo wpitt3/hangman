@@ -1,11 +1,9 @@
-package dulcinea.hangman
+package dulcinea.hangman.elasticsearch
 
-import dulcinea.hangman.esrepo.EsResult
-import dulcinea.hangman.esrepo.EsResultAnalyser
 import org.junit.Test
 import org.assertj.core.api.Assertions.assertThat as assertThat
 
-class EsEsResultAnalyserTest {
+class EsResultAnalyserTest {
 
     @Test
     fun `ResultAnalyser gets score from aggResult`() {

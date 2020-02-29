@@ -1,8 +1,7 @@
-package dulcinea.hangman.esrepo
+package dulcinea.hangman.elasticsearch
 
 import com.google.gson.Gson
 import dulcinea.hangman.Word
-import dulcinea.hangman.WordRepository
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchType
@@ -24,7 +23,7 @@ import java.net.InetAddress
 
 
 @Repository
-class EsWordRepository(properties: EsProps): WordRepository {
+class EsWordRepository(properties: EsProps) {
     val index: String = properties.index
     val host: String = properties.host
     val port: Int = properties.port
@@ -40,7 +39,7 @@ class EsWordRepository(properties: EsProps): WordRepository {
                 .addTransportAddress(TransportAddress(InetAddress.getByName(host), port))
     }
 
-    override fun setupIndex() {
+    fun setupIndex() {
         client.admin().indices().prepareCreate(index).setSettings(Settings.builder().put("index.refresh_interval", "5s")).get()
         val source = "{\"_doc\":{\"include_in_all\":false,\"dynamic\":\"strict\",\"properties\":{\"count\":{\"type\":\"keyword\"},\"negative\":{\"type\":\"keyword\"},\"position\":{\"type\":\"keyword\"},\"positionOfSingle\":{\"type\":\"keyword\"},\"unique\":{\"type\":\"keyword\"},\"word\":{\"type\":\"keyword\"}}}}"
 
@@ -50,16 +49,16 @@ class EsWordRepository(properties: EsProps): WordRepository {
                 .get()
     }
 
-    override fun create(word: Word) {
+    fun create(word: Word) {
         client.prepareIndex(index, "_doc", word.word)
                 .setSource(gson.toJson(word), XContentType.JSON).get()
     }
 
-    override fun refresh() {
+    fun refresh() {
         client.admin().indices().refresh(RefreshRequest(index)).get()
     }
 
-    override fun get(): List<Word> {
+    fun get(): List<Word> {
         val response: SearchResponse = client.prepareSearch(index)
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                 .setQuery(QueryBuilders.matchAllQuery())
@@ -69,7 +68,7 @@ class EsWordRepository(properties: EsProps): WordRepository {
         return response.hits.map { gson.fromJson(it.sourceAsString, Word::class.java) }
     }
 
-    override fun findAggregations(with: List<String>, without: List<String>): EsResult {
+    fun findAggregations(with: List<String>, without: List<String>): EsResult {
         return findAggregations(createQueryBuilder(with, without))
     }
 

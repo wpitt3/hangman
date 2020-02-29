@@ -1,8 +1,6 @@
-package dulcinea.hangman
+package dulcinea.hangman.elasticsearch
 
-import dulcinea.hangman.esrepo.EsProps
-import dulcinea.hangman.esrepo.EsResult
-import dulcinea.hangman.esrepo.EsWordRepository
+import dulcinea.hangman.Word
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test

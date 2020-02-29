@@ -1,4 +1,4 @@
-package dulcinea.hangman.esrepo
+package dulcinea.hangman.elasticsearch
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding

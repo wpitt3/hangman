@@ -1,4 +1,4 @@
-package dulcinea.hangman.esrepo
+package dulcinea.hangman.elasticsearch
 
 import org.springframework.stereotype.Service
 

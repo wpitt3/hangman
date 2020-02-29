@@ -1,18 +1,18 @@
-package dulcinea.hangman.esrepo
+package dulcinea.hangman.elasticsearch
 
 import dulcinea.hangman.*
 import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class EsHangmanService(val wordRepository: WordRepository, val resultAnalyser: EsResultAnalyser) {
+class EsHangmanService(val wordRepository: EsWordRepository, val resultAnalyser: EsResultAnalyser) {
     var status: PersistenceStatus = PersistenceStatus.DOWN
 
     init {
         Thread {setup(wordRepository)}.start()
     }
 
-    private fun setup(wordRepository: WordRepository) {
+    private fun setup(wordRepository: EsWordRepository) {
         var words: List<Word> = listOf()
         try {
             words = wordRepository.get()
@@ -29,8 +29,7 @@ class EsHangmanService(val wordRepository: WordRepository, val resultAnalyser: E
         status = PersistenceStatus.READY
     }
 
-    fun makeGuess(letter: String, with: MutableList<String>, without: MutableList<String>) : SearchOption {
-
+    fun makeGuess(letter: String, with: List<String>, without: List<String>) : SearchOption {
         val options = (0..5).filter{with[it] == ""}
                 .map{ SearchOption(listOf(letter + it), listOf()) }
                 .toMutableList() + SearchOption(listOf(), listOf(letter))
@@ -43,7 +42,7 @@ class EsHangmanService(val wordRepository: WordRepository, val resultAnalyser: E
         return searchOption
     }
 
-    private fun indexedLetters(with: MutableList<String>): MutableList<String> {
+    private fun indexedLetters(with: List<String>): MutableList<String> {
         return (0..5).filter{with[it] != ""}.map{"${with[it]}${it}"}.toMutableList()
     }
 

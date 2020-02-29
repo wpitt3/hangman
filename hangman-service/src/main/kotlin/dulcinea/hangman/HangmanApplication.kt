@@ -1,6 +1,6 @@
 package dulcinea.hangman
 
-import dulcinea.hangman.esrepo.EsProps
+import dulcinea.hangman.elasticsearch.EsProps
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication

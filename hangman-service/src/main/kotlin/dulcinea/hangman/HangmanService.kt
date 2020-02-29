@@ -1,7 +1,6 @@
 package dulcinea.hangman
 
-import dulcinea.hangman.esrepo.EsHangmanService
-import dulcinea.hangman.esrepo.EsResultAnalyser
+import dulcinea.hangman.elasticsearch.EsHangmanService
 import org.springframework.stereotype.Service
 
 @Service

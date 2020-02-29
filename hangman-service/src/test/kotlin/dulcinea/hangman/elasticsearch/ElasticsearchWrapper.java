@@ -1,4 +1,4 @@
-package dulcinea.hangman;
+package dulcinea.hangman.elasticsearch;
 
 import org.junit.ClassRule;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
