@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/game")
-class GameController(val hangmanService: HangmanService) {
+class HangmanController(val hangmanService: HangmanService) {
 
     @GetMapping
     fun getStatus() : GameStatus {

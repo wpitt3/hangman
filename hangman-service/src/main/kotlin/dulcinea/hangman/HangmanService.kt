@@ -4,14 +4,19 @@ import dulcinea.hangman.elasticsearch.EsHangmanService
 import org.springframework.stereotype.Service
 
 @Service
-class HangmanService(val esHangmanService: EsHangmanService) {
+class HangmanService(val esHangmanService: EsHangmanService, hangmanProps: HangmanProps) {
     private final val INPUT_REGEX = "^[A-Z]$".toRegex()
+    val wordLength = hangmanProps.letters
 
-    var with: MutableList<String> = (0..5).map{""}.toMutableList()
+    var with: MutableList<String> = (1..wordLength).map{""}.toMutableList()
     var without: MutableList<String> = mutableListOf()
 
+    init {
+        Thread {esHangmanService.setup()}.start()
+    }
+
     fun newGame() {
-        with = (0..5).map{""}.toMutableList()
+        with = (1..wordLength).map{""}.toMutableList()
         without = mutableListOf()
     }
 

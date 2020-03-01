@@ -5,14 +5,12 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class EsHangmanService(val wordRepository: EsWordRepository, val resultAnalyser: EsResultAnalyser) {
+class EsHangmanService(val wordRepository: EsWordRepository, val resultAnalyser: EsResultAnalyser, val hangmanProps: HangmanProps) {
     var status: PersistenceStatus = PersistenceStatus.DOWN
+    val wordLength = hangmanProps.letters
+    val file = hangmanProps.file
 
-    init {
-        Thread {setup(wordRepository)}.start()
-    }
-
-    private fun setup(wordRepository: EsWordRepository) {
+    fun setup() {
         var words: List<Word> = listOf()
         try {
             words = wordRepository.get()
@@ -30,7 +28,7 @@ class EsHangmanService(val wordRepository: EsWordRepository, val resultAnalyser:
     }
 
     fun makeGuess(letter: String, with: List<String>, without: List<String>) : SearchOption {
-        val options = (0..5).filter{with[it] == ""}
+        val options = (0..(wordLength-1)).filter{with[it] == ""}
                 .map{ SearchOption(listOf(letter + it), listOf()) }
                 .toMutableList() + SearchOption(listOf(), listOf(letter))
 
@@ -44,11 +42,11 @@ class EsHangmanService(val wordRepository: EsWordRepository, val resultAnalyser:
     }
 
     private fun indexedLetters(with: List<String>): MutableList<String> {
-        return (0..5).filter{with[it] != ""}.map{"${with[it]}${it}"}.toMutableList()
+        return (0..(wordLength-1)).filter{with[it] != ""}.map{"${with[it]}${it}"}.toMutableList()
     }
 
     fun populateRepo() {
-        val words: List<String> = File("src/main/resources/six_letter_words.txt").readLines() //TODO configurable
+        val words: List<String> = File(file).readLines() //TODO configurable
         words.forEach {
             wordRepository.create(Word(it))
         }

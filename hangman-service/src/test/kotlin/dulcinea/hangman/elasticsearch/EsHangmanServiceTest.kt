@@ -1,6 +1,7 @@
 package dulcinea.hangman.elasticsearch
 
 
+import dulcinea.hangman.HangmanProps
 import dulcinea.hangman.SearchOption
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -21,7 +22,7 @@ class EsHangmanServiceTest {
 
     @Before
     fun setup() {
-        hangmanService = EsHangmanService(wordRepository, resultAnalyser)
+        hangmanService = EsHangmanService(wordRepository, resultAnalyser, HangmanProps(6, "src/main/resources/6_letter_words.txt"))
     }
 
     @Test

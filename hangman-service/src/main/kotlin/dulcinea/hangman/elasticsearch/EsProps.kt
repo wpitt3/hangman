@@ -5,4 +5,4 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
 @ConfigurationProperties("elasticsearch")
-data class EsProps(var index: String, val host: String, val port: Int) {}
+data class EsProps(val index: String, val host: String, val port: Int, val searchDepth: Int) {}

@@ -14,7 +14,7 @@ class EsWordRepositoryTest: ElasticsearchWrapper() {
         @BeforeClass @JvmStatic fun setup() {
             elasticsearchContainer.start()
             val address = elasticsearchContainer.tcpHost.toString().split(":")
-            repo = EsWordRepository(EsProps("hangman", "localhost", address[1].toInt()))
+            repo = EsWordRepository(EsProps("hangman", "localhost", address[1].toInt(), 2))
             repo.setupIndex()
             repo.create(Word("ADJURE"))
             repo.create(Word("BADGER"))

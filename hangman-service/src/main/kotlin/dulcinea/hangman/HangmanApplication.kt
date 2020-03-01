@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-@EnableConfigurationProperties(EsProps::class)
+@EnableConfigurationProperties(EsProps::class, HangmanProps::class)
 class HangmanApplication
 
 fun main(args: Array<String>) {

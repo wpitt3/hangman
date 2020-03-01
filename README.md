@@ -19,3 +19,7 @@ docker image to populate es image
 docker compose 
 
 different persistence layer
+
+ability to have multiple games at once
+
+ui

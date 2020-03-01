@@ -19,7 +19,7 @@ class HangmanServiceTest {
 
     @Before
     fun setup() {
-        hangmanService = HangmanService(esHangmanService)
+        hangmanService = HangmanService(esHangmanService, HangmanProps(6, ""))
     }
 
     @Test

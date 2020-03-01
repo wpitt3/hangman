@@ -15,11 +15,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 
 @RunWith(SpringRunner::class)
-@SpringBootTest(classes = [GameController::class], webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(classes = [HangmanController::class], webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @WebAppConfiguration
 @AutoConfigureMockMvc
 @EnableWebMvc
-class GameControllerTest {
+class HangmanControllerTest {
 
     @Autowired
     lateinit var mockMvc: MockMvc
