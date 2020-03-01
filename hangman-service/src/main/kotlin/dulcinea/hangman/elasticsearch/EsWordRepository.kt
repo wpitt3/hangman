@@ -5,6 +5,7 @@ import dulcinea.hangman.Word
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchType
+import org.elasticsearch.client.transport.NoNodeAvailableException
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.TransportAddress
@@ -39,7 +40,20 @@ class EsWordRepository(properties: EsProps) {
                 .addTransportAddress(TransportAddress(InetAddress.getByName(host), port))
     }
 
+    fun waitForHealthyIndex() {
+        var healthy = false
+        while(!healthy) {
+            try {
+                client.admin().cluster().prepareHealth().setWaitForYellowStatus().get();
+                healthy = true
+            } catch (e: NoNodeAvailableException) {
+                Thread.sleep(100L)
+            }
+        }
+    }
+
     fun setupIndex() {
+
         client.admin().indices().prepareCreate(index).setSettings(Settings.builder().put("index.refresh_interval", "5s")).get()
         val source = "{\"_doc\":{\"include_in_all\":false,\"dynamic\":\"strict\",\"properties\":{\"count\":{\"type\":\"keyword\"},\"negative\":{\"type\":\"keyword\"},\"position\":{\"type\":\"keyword\"},\"positionOfSingle\":{\"type\":\"keyword\"},\"unique\":{\"type\":\"keyword\"},\"word\":{\"type\":\"keyword\"}}}}"
 

@@ -11,6 +11,8 @@ class EsHangmanService(val wordRepository: EsWordRepository, val resultAnalyser:
     val file = hangmanProps.file
 
     fun setup() {
+        println("waiting for healthy")
+        wordRepository.waitForHealthyIndex()
         var words: List<Word> = listOf()
         try {
             words = wordRepository.get()
