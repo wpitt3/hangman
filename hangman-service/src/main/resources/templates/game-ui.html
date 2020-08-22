@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Hangman</title>
+        <meta charset="text/html; utf-8">
+        <link rel="stylesheet" th:href="@{/game.css}"/>
+
+    </head>
+    <body>
+    <div class="container">
+        <h2>Hangman</h2>
+        <div class="upper">
+            <div class="state">
+
+                    <div class="state-letter" th:each="letter: ${state}" th:text="${letter}"></div>
+            </div>
+        </div>
+        <div class="lower">
+            <div class="letters">
+                <form th:action="@{/ui}">
+                    <button type="submit" th:name="action"  th:value="${letter.value}" th:each="letter: ${letters}" th:text="${letter.value}" th:disabled="${!letter.active}">
+                    </button>
+                </form>
+            </div>
+            <div class="bottom-right">
+                <div class="lives">
+                    <div>Lives:</div>
+                    <div th:text="${lives}"></div>
+                </div>
+                <div class="new-game">
+                    <form th:action="@{/ui}">
+                        <button type="submit" th:name="action"  th:value="new-game">New Game</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    </body>
+</html>

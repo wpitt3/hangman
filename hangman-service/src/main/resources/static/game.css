@@ -1,0 +1,89 @@
+
+
+h2 {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.upper {
+    margin: 0 0 0 0;
+    width: 100%;
+    height: 100px;
+}
+
+.state {
+    max-width: 100%;
+    width: max-content;
+    margin: 0 auto;
+}
+
+.state-letter {
+    float: left;
+    display: block;
+    margin: 0 7px;
+    min-width: 20px;
+    min-height: 40px;
+    font-size: 35px;
+}
+
+.lower {
+    width: 100%;
+    height: 100px;
+    float: left;
+    display: block;
+}
+
+.letters {
+    width: 70%;
+    height: 100px;
+    float: left;
+    display: block;
+}
+
+.letters button {
+    width: 35px;
+    height: 35px;
+    margin: 12px;
+}
+
+.letters button:disabled {
+    background: black;
+}
+
+.bottom-right {
+    width: 30%;
+    height: 100px;
+    float: left;
+    display: block;
+}
+
+.lives {
+    margin: 0 40px;
+    text-align: center;
+    width: 100%;
+    float: left;
+    display: block;
+}
+
+.lives div {
+    margin: 10px;
+    float: left;
+    display: block;
+}
+
+.new-game {
+    margin: 0 45px;
+    text-align: center;
+    float: left;
+    display: block;
+}
+
+.new-game button {
+    height: 35px;
+
+}
