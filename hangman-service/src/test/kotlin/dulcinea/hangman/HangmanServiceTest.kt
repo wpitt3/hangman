@@ -1,7 +1,6 @@
 package dulcinea.hangman
 
 
-import dulcinea.hangman.elasticsearch.EsHangmanService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -14,12 +13,12 @@ import org.mockito.junit.MockitoJUnitRunner
 @RunWith(MockitoJUnitRunner::class)
 class HangmanServiceTest {
 
-    var esHangmanService: EsHangmanService = mock(EsHangmanService::class.java)
+    var wordService: WordService = mock(WordService::class.java)
     lateinit var hangmanService: HangmanService
 
     @Before
     fun setup() {
-        hangmanService = HangmanService(esHangmanService, HangmanProps(6, ""))
+        hangmanService = HangmanService(wordService, HangmanProps(6, ""))
     }
 
     @Test
@@ -53,7 +52,7 @@ class HangmanServiceTest {
         hangmanService.makeGuess("0")
         hangmanService.makeGuess("AA")
 
-        verify(esHangmanService, never()).makeGuess(anyString(), anyList(), anyList())
+        verify(wordService, never()).makeGuess(anyString(), anyList(), anyList())
     }
 
     @Test
@@ -61,7 +60,7 @@ class HangmanServiceTest {
         hangmanService.with[0] = "A"
         hangmanService.makeGuess("A")
 
-        verify(esHangmanService, never()).makeGuess(anyString(), anyList(), anyList())
+        verify(wordService, never()).makeGuess(anyString(), anyList(), anyList())
     }
 
     @Test
@@ -69,6 +68,6 @@ class HangmanServiceTest {
         hangmanService.without.add("A")
         hangmanService.makeGuess("A")
 
-        verify(esHangmanService, never()).makeGuess(anyString(), anyList(), anyList())
+        verify(wordService, never()).makeGuess(anyString(), anyList(), anyList())
     }
 }

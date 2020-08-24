@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*
 @Controller
 @RequestMapping("/ui")
 class HangmanUiController(val hangmanService: HangmanService) {
-
     val aCharIndex: Int = 'A'.toInt()
     val maxLives = 10
 
@@ -16,7 +15,7 @@ class HangmanUiController(val hangmanService: HangmanService) {
         if (action != null) {
             if (action == "new-game") {
                 hangmanService.newGame()
-            } else if (action.length == 1 && action[0].toInt() >= aCharIndex && action[0].toInt() < aCharIndex + 25) {
+            } else if (action.length == 1 && action[0].toInt() >= aCharIndex && action[0].toInt() < aCharIndex + 26) {
                 hangmanService.makeGuess(action)
             }
         }

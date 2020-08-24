@@ -1,10 +1,10 @@
 package dulcinea.hangman
 
-import dulcinea.hangman.elasticsearch.EsHangmanService
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 
 @Service
-class HangmanService(val esHangmanService: EsHangmanService, hangmanProps: HangmanProps) {
+class HangmanService(@Qualifier("wordStoreService") val wordService: WordService, hangmanProps: HangmanProps) {
     private final val INPUT_REGEX = "^[A-Z]$".toRegex()
     val wordLength = hangmanProps.letters
 
@@ -12,7 +12,7 @@ class HangmanService(val esHangmanService: EsHangmanService, hangmanProps: Hangm
     var without: MutableList<String> = mutableListOf()
 
     init {
-        Thread {esHangmanService.setup()}.start()
+        Thread {wordService.setup()}.start()
     }
 
     fun newGame() {
@@ -31,7 +31,7 @@ class HangmanService(val esHangmanService: EsHangmanService, hangmanProps: Hangm
             return getStatus()
         }
 
-        val searchOption = esHangmanService.makeGuess(letter, with, without)
+        val searchOption = wordService.makeGuess(letter, with, without)
 
         updateStateWithOption(searchOption)
         return getStatus()
@@ -39,8 +39,8 @@ class HangmanService(val esHangmanService: EsHangmanService, hangmanProps: Hangm
 
     private fun updateStateWithOption(searchOption: SearchOption) {
         without.addAll(searchOption.without)
-        searchOption.with.forEach{
-            with[it[1].toString().toInt()] = it[0].toString()
+        searchOption.with.indices.forEach{
+            with[it] = searchOption.with[it]
         }
     }
 }

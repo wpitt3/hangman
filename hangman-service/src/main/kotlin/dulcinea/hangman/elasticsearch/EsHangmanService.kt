@@ -5,12 +5,12 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class EsHangmanService(val wordRepository: EsWordRepository, val resultAnalyser: EsResultAnalyser, val hangmanProps: HangmanProps) {
+class EsHangmanService(val wordRepository: EsWordRepository, val resultAnalyser: EsResultAnalyser, val hangmanProps: HangmanProps): WordService {
     var status: PersistenceStatus = PersistenceStatus.DOWN
     val wordLength = hangmanProps.letters
     val file = hangmanProps.file
 
-    fun setup() {
+    override fun setup() {
         println("waiting for healthy")
         wordRepository.waitForHealthyIndex()
         var words: List<Word> = listOf()
@@ -29,7 +29,7 @@ class EsHangmanService(val wordRepository: EsWordRepository, val resultAnalyser:
         status = PersistenceStatus.READY
     }
 
-    fun makeGuess(letter: String, with: List<String>, without: List<String>) : SearchOption {
+    override fun makeGuess(letter: String, with: List<String>, without: List<String>) : SearchOption {
         val options = (0..(wordLength-1)).filter{with[it] == ""}
                 .map{ SearchOption(listOf(letter + it), listOf()) }
                 .toMutableList() + SearchOption(listOf(), listOf(letter))
@@ -47,13 +47,12 @@ class EsHangmanService(val wordRepository: EsWordRepository, val resultAnalyser:
         return (0..(wordLength-1)).filter{with[it] != ""}.map{"${with[it]}${it}"}.toMutableList()
     }
 
-    fun populateRepo() {
+    private fun populateRepo() {
         val words: List<String> = File(file).readLines() //TODO configurable
         words.forEach {
             wordRepository.create(Word(it))
         }
     }
-
 }
 
 enum class PersistenceStatus{ DOWN, INITIALISEING, READY}
