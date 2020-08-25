@@ -2,5 +2,5 @@ package dulcinea.hangman
 
 interface WordService {
     fun setup()
-    fun makeGuess(letter: String, with: List<String>, without: List<String>) : SearchOption
+    fun makeGuess(letter: Char, with: List<Char?>, without: Set<Char>) : SearchOption
 }

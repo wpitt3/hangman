@@ -5,9 +5,10 @@ import dulcinea.hangman.SearchOption
 import dulcinea.hangman.WordService
 import org.springframework.stereotype.Service
 import java.io.File
+import java.lang.RuntimeException
 
 @Service
-class WordStoreService(val hangmanProps: HangmanProps): WordService{
+class WordStoreService(val hangmanProps: HangmanProps): WordService {
     val wordLength = hangmanProps.letters
     val file = hangmanProps.file
     lateinit var wordCache: WordCache
@@ -17,18 +18,21 @@ class WordStoreService(val hangmanProps: HangmanProps): WordService{
         wordCache = WordCache(words)
     }
 
-    override fun makeGuess(letter: String, with: List<String>, without: List<String>): SearchOption {
-        val result = wordCache.makeGuess(letter[0], with.map{ if (it == "") null else it[0]}, without.map{it[0]}.toSet())
-
-        (0..6).forEach{
-            println(result[it].size.toString() + " " + result[it].take(10))
+    override fun makeGuess(letter: Char, with: List<Char?>, without: Set<Char>): SearchOption {
+        val result = wordCache.makeGuess(letter, with, without)
+        println("")
+        result.forEach{ k, v ->
+            if (v.size > 0) {
+                println(k.map { if (it == null) " " else it }.joinToString("") + " " + v.size + " " + v.take(10))
+            }
         }
-        val bestIndex = result.indexOf(result.maxBy { it.size })
-        if (bestIndex == wordLength) {
+        val best = result.maxBy{ it.value.size }
+        if (best == null || best.value.isEmpty()) {
+            throw RuntimeException("need to implement more letters")
+        }
+        if (best.key == with) {
             return SearchOption(with, without + letter)
         }
-        val newWith = with.toMutableList()
-        newWith[bestIndex] = letter
-        return SearchOption(newWith, without)
+        return SearchOption(best.key, without)
     }
 }

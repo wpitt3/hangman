@@ -11,30 +11,65 @@ class WordCacheTest {
         assertThat(Word("ADJURE").matches(emptyList(" D    "), setOf())).isTrue()
         assertThat(Word("ADJURE").matches(emptyList(" B    "), setOf())).isFalse()
         assertThat(Word("ADJURE").matches(emptyList("      "), setOf('D'))).isFalse()
-        assertThat(Word("ADDED").matches(emptyList(" D   "), setOf())).isFalse()
+        assertThat(Word("ADDER").matches(emptyList(" DD  "), setOf(), setOf('A', 'E', 'R'), setOf('D'))).isTrue()
+        assertThat(Word("ADDER").matches(emptyList("     "), setOf(), setOf('A', 'E', 'R'), setOf('D'))).isTrue()
+        assertThat(Word("ADDER").matches(emptyList(" D   "), setOf(), setOf('A', 'E', 'R'), setOf('D'))).isFalse()
+        assertThat(Word("SCROLLS").matches(emptyList("S     S"), setOf(), setOf('C', 'O', 'R'), setOf('S', 'L'))).isTrue()
     }
 
     @Test
-    fun `wordcache returns guesses`() {
+    fun `wordcache returns guesses for single letter`() {
         val wordCache = wordCache()
 
         val result = wordCache.makeGuess('A', listOf(null, null, null, null, null, null), setOf())
 
-        assertThat(result).hasSize(7)
-        assertThat(result).containsExactly(
-            listOf(Word("AEEEEB")),
-            listOf(Word("EAEEEE")),
-            listOf(Word("EEAEEB")),
-            listOf(Word("EEEAEE")),
-            listOf(Word("EEEEAE")),
-            listOf(Word("EEEEEA")),
-            listOf(Word("EEEEEE"))
-        )
+        assertThat(result).hasSize(22) // 1 + 6 + 15
+        assertThat(result).contains(pair("      ", "BEDDER"))
+        assertThat(result).contains(pair("A     ", "ABIDES"))
+        assertThat(result).contains(pair(" A    ", "BACHES"))
+        assertThat(result).contains(pair("  A   ", "BEAMED"))
+        assertThat(result).contains(pair("   A  ", "BEHAVE"))
+        assertThat(result).contains(pair("    A ", "BELEAP"))
+        assertThat(result).contains(pair("     A", "BUCKRA"))
     }
 
     @Test
-    fun `wordcache cachekey`() {
-        assertThat(wordCache().cacheKey(listOf(null, 'C'), setOf('A', 'B'))).isEqualTo(wordCache().cacheKey(listOf(null, 'C'), setOf('B', 'A')))
+    fun `wordcache returns guesses for single letter and without`() {
+        val wordCache = wordCache()
+
+        val result = wordCache.makeGuess('A', listOf(null, null, null, null, null, null), setOf('D'))
+
+        assertThat(result).hasSize(22) // 1 + 6 + 15
+        assertThat(result).contains(pair("      ", null))
+        assertThat(result).contains(pair("A     ", null))
+        assertThat(result).contains(pair(" A    ", "BACHES"))
+        assertThat(result).contains(pair("  A   ", null))
+        assertThat(result).contains(pair("   A  ", "BEHAVE"))
+        assertThat(result).contains(pair("    A ", "BELEAP"))
+        assertThat(result).contains(pair("     A", "BUCKRA"))
+    }
+
+    @Test
+    fun `wordcache returns guesses for double letter`() {
+        val wordCache = wordCache()
+
+        val result = wordCache.makeGuess('D', listOf(null, null, null, null, null, null), setOf())
+
+        assertThat(result).hasSize(22) // 1 + 6 + 15
+        assertThat(result).contains(pair("   D  ", "ABIDES"))
+        assertThat(result).contains(pair("     D", "BEAMED"))
+        assertThat(result).contains(pair("  DD  ", "BEDDER"))
+        assertThat(result).contains(pair("  DD  ", "BEDDER"))
+    }
+
+    @Test
+    fun `wordcache returns guesses for existing double letter`() {
+        val wordCache = wordCache()
+
+        val result = wordCache.makeGuess('B', listOf(null, null, 'D', 'D', null, null), setOf())
+
+        assertThat(result).hasSize(11) // 1 + 4 + 6
+        assertThat(result).contains(pair("B DD  ", "BEDDER"))
     }
 
     @Test
@@ -52,6 +87,12 @@ class WordCacheTest {
     }
 
     private fun wordCache(): WordCache {
-        return WordCache(listOf("AEEEEB", "EAEEEE", "EEAEEB", "EEEAEE", "EEEEAE", "EEEEEA", "EEEEEE"))
+        return WordCache(listOf("ABIDES", "BACHES", "BEAMED", "BEHAVE", "BELEAP", "BUCKRA", "BEDDER"))
+    }
+
+    private fun pair(key: String, value: String?): Map.Entry<List<Char?>, List<Word>>? {
+        val x = hashMapOf<List<Char?>, List<Word>>()
+        x[key.map{if (it == ' ') null else it}] = if (value != null) listOf(Word(value)) else listOf()
+        return x.entries.toList()[0]
     }
 }
