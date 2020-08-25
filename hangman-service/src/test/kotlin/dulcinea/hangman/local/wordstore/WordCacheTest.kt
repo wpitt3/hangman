@@ -11,19 +11,23 @@ class WordCacheTest {
         assertThat(Word("ADJURE").matches(emptyList(" D    "), setOf())).isTrue()
         assertThat(Word("ADJURE").matches(emptyList(" B    "), setOf())).isFalse()
         assertThat(Word("ADJURE").matches(emptyList("      "), setOf('D'))).isFalse()
-        assertThat(Word("ADDER").matches(emptyList(" DD  "), setOf(), setOf('A', 'E', 'R'), setOf('D'))).isTrue()
-        assertThat(Word("ADDER").matches(emptyList("     "), setOf(), setOf('A', 'E', 'R'), setOf('D'))).isTrue()
-        assertThat(Word("ADDER").matches(emptyList(" D   "), setOf(), setOf('A', 'E', 'R'), setOf('D'))).isFalse()
-        assertThat(Word("SCROLLS").matches(emptyList("S     S"), setOf(), setOf('C', 'O', 'R'), setOf('S', 'L'))).isTrue()
+        assertThat(Word("ADDER").matches(emptyList(" DD  "), setOf(), setOf('A', 'E', 'R'), setOf('D'), setOf())).isTrue()
+        assertThat(Word("ADDER").matches(emptyList("     "), setOf(), setOf('A', 'E', 'R'), setOf('D'), setOf())).isTrue()
+        assertThat(Word("ADDER").matches(emptyList(" D   "), setOf(), setOf('A', 'E', 'R'), setOf('D'), setOf())).isFalse()
+        assertThat(Word("ADDED").matches(emptyList(" DD D"), setOf(), setOf('A', 'E'), setOf(), setOf('D'))).isTrue()
+        assertThat(Word("ADDED").matches(emptyList(" DD  "), setOf(), setOf('A', 'E'), setOf(), setOf('D'))).isFalse()
+        assertThat(Word("ADDED").matches(emptyList(" D   "), setOf(), setOf('A', 'E'), setOf(), setOf('D'))).isFalse()
+        assertThat(Word("ADDED").matches(emptyList("     "), setOf(), setOf('A', 'E'), setOf(), setOf('D'))).isTrue()
+        assertThat(Word("SCROLLS").matches(emptyList("S     S"), setOf(), setOf('C', 'O', 'R'), setOf('S', 'L'), setOf())).isTrue()
     }
 
     @Test
     fun `wordcache returns guesses for single letter`() {
         val wordCache = wordCache()
 
-        val result = wordCache.makeGuess('A', listOf(null, null, null, null, null, null), setOf())
+        val result = wordCache.makeGuess('A', listOf(null, null, null, null, null, null), setOf('F'))
 
-        assertThat(result).hasSize(22) // 1 + 6 + 15
+        assertThat(result).hasSize(7)
         assertThat(result).contains(pair("      ", "BEDDER"))
         assertThat(result).contains(pair("A     ", "ABIDES"))
         assertThat(result).contains(pair(" A    ", "BACHES"))
@@ -39,11 +43,8 @@ class WordCacheTest {
 
         val result = wordCache.makeGuess('A', listOf(null, null, null, null, null, null), setOf('D'))
 
-        assertThat(result).hasSize(22) // 1 + 6 + 15
-        assertThat(result).contains(pair("      ", null))
-        assertThat(result).contains(pair("A     ", null))
+        assertThat(result).hasSize(5)
         assertThat(result).contains(pair(" A    ", "BACHES"))
-        assertThat(result).contains(pair("  A   ", null))
         assertThat(result).contains(pair("   A  ", "BEHAVE"))
         assertThat(result).contains(pair("    A ", "BELEAP"))
         assertThat(result).contains(pair("     A", "BUCKRA"))
@@ -55,10 +56,9 @@ class WordCacheTest {
 
         val result = wordCache.makeGuess('D', listOf(null, null, null, null, null, null), setOf())
 
-        assertThat(result).hasSize(22) // 1 + 6 + 15
+        assertThat(result).hasSize(4)
         assertThat(result).contains(pair("   D  ", "ABIDES"))
         assertThat(result).contains(pair("     D", "BEAMED"))
-        assertThat(result).contains(pair("  DD  ", "BEDDER"))
         assertThat(result).contains(pair("  DD  ", "BEDDER"))
     }
 
@@ -68,8 +68,18 @@ class WordCacheTest {
 
         val result = wordCache.makeGuess('B', listOf(null, null, 'D', 'D', null, null), setOf())
 
-        assertThat(result).hasSize(11) // 1 + 4 + 6
+        assertThat(result).hasSize(2)
         assertThat(result).contains(pair("B DD  ", "BEDDER"))
+    }
+
+    @Test
+    fun `wordcache returns guesses for existing triple letter`() {
+        val wordCache = wordCache()
+
+        val result = wordCache.makeGuess('F', listOf(null, null, null, null, null, null), setOf())
+
+        assertThat(result).hasSize(2)
+        assertThat(result).contains(pair("F  FF ", "FLUFFY"))
     }
 
     @Test
@@ -87,7 +97,7 @@ class WordCacheTest {
     }
 
     private fun wordCache(): WordCache {
-        return WordCache(listOf("ABIDES", "BACHES", "BEAMED", "BEHAVE", "BELEAP", "BUCKRA", "BEDDER"))
+        return WordCache(listOf("ABIDES", "BACHES", "BEAMED", "BEHAVE", "BELEAP", "BUCKRA", "BEDDER", "FLUFFY"))
     }
 
     private fun pair(key: String, value: String?): Map.Entry<List<Char?>, List<Word>>? {
