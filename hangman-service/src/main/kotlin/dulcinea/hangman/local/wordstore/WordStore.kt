@@ -5,7 +5,7 @@ class WordCache(words: List<String>) {
     private val minBeforeTriples = 20
     private val allWords: List<Word> = words.map { Word(it) }
 
-    fun makeGuess(letter: Char, with: List<Char?>, without: Set<Char>): Map<List<Char?>, List<Word>> {
+    fun makeGuess(letter: Char, with: List<Char?>, without: Set<Char>): Map<SearchKey, List<Word>> {
         val unique: Set<Char> = with.filterNotNull().toSet()
         val single = unique.filter{ letter -> with.count { it == letter } == 1}.toSet()
         val double = unique.filter{ letter -> with.count { it == letter } == 2}.toSet()
@@ -15,26 +15,26 @@ class WordCache(words: List<String>) {
         return makeGuess(letter, with, without, words)
     }
 
-    fun makeGuess(letter: Char, with: List<Char?>, without: Set<Char>, words: List<Word>): Map<List<Char?>, List<Word>> {
-        val guesses = mutableMapOf<List<Char?>, List<Word>>()
-        guesses[with] = words.filterWithout(with, without, letter)
+    fun makeGuess(letter: Char, with: List<Char?>, without: Set<Char>, words: List<Word>): Map<SearchKey, List<Word>> {
+        val guesses = mutableMapOf<SearchKey, List<Word>>()
+        guesses[SearchKey(with, without + letter)] = words.filterWithout(with, without, letter)
 
         guesses.putAll(with.indices.filter{with[it] == null}.map{
             val newWith = with.addLetters(letter, it)
-            newWith.toList() to words.filterSingle(newWith, without, letter)
+            SearchKey(newWith.toList(), without) to words.filterSingle(newWith, without, letter)
         }.filter{ it.second.isNotEmpty()}.toMap())
 
         if (words.size < minBeforeDoubles) {
             guesses.putAll(combinationPairs(with).map { combo ->
                 val newWith = with.addLetters(letter, combo[0], combo[1])
-                newWith.toList() to words.filterDouble(newWith, without, letter)
+                SearchKey(newWith.toList(), without) to words.filterDouble(newWith, without, letter)
             }.filter{ it.second.isNotEmpty() })
         }
 
         if (words.size < minBeforeTriples) {
             guesses.putAll(combinationTriples(with).map { combo ->
                 val newWith = with.addLetters(letter, combo[0], combo[1], combo[2])
-                newWith.toList() to words.filterTriple(newWith, without, letter)
+                SearchKey(newWith.toList(), without) to words.filterTriple(newWith, without, letter)
             }.filter{ it.second.isNotEmpty()})
         }
 
@@ -81,6 +81,8 @@ class WordCache(words: List<String>) {
         }.flatten()
     }
 }
+
+data class SearchKey(val with: List<Char?>, val without: Set<Char>)
 
 data class Word(var input: String) {
     private val aCharIndex: Int = 'A'.toInt()
