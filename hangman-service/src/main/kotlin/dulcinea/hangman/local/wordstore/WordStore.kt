@@ -5,11 +5,20 @@ class WordCache(words: List<String>) {
     private val minBeforeTriples = 20
     private val allWords: List<Word> = words.map { Word(it) }
 
+    fun allMatchingWords(with: List<Char?>, without: Set<Char>): List<Word> {
+        val unique: Set<Char> = with.filterNotNull().toSet()
+        val single = unique.filter{ l -> with.count { it == l } == 1}.toSet()
+        val double = unique.filter{ l -> with.count { it == l } == 2}.toSet()
+        val triple = unique.filter{ l -> with.count { it == l } == 3}.toSet()
+
+        return allWords.filter{ it.matches(with, without, single, double, triple) }
+    }
+
     fun makeGuess(letter: Char, with: List<Char?>, without: Set<Char>): Map<SearchKey, List<Word>> {
         val unique: Set<Char> = with.filterNotNull().toSet()
-        val single = unique.filter{ letter -> with.count { it == letter } == 1}.toSet()
-        val double = unique.filter{ letter -> with.count { it == letter } == 2}.toSet()
-        val triple = unique.filter{ letter -> with.count { it == letter } == 3}.toSet()
+        val single = unique.filter{ l -> with.count { it == l } == 1}.toSet()
+        val double = unique.filter{ l -> with.count { it == l } == 2}.toSet()
+        val triple = unique.filter{ l -> with.count { it == l } == 3}.toSet()
 
         val words = allWords.filter{ it.matches(with, without, single, double, triple) }
         return makeGuess(letter, with, without, words)
