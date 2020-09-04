@@ -24,72 +24,46 @@ class WordStoreService(val hangmanProps: HangmanProps): WordService {
     }
 
     override fun makeGuess(letter: Char, with: List<Char?>, without: Set<Char>): SearchOption {
-
         val allMatchingWords = wordCache.allMatchingWords(with, without)
 
-        val result: Map<SearchKey, List<Word>> = wordCache.makeGuess(letter, with, without)
+        val keyScore = findMax(letter, SearchKey(with, without), allMatchingWords, 1, Integer.MAX_VALUE, Int.MIN_VALUE)
 
-        val x: Map<SearchKey, Map<Char, Map<SearchKey, List<Word>>>> = result.toList().sortedBy { -it.second.size }.map {
-            println(it.second.size)
-            it.first to makeGuess(it.first.with, it.first.without, it.second, 1)
-        }.toMap()
-
-        val best = result.maxBy{ it.value.size }
-        if (best == null || best.value.isEmpty()) {
-            throw RuntimeException("need to implement more letters")
-        }
-
-        if (best.key.with == with) {
-            return SearchOption(with, without + letter)
-        }
-        return SearchOption(best.key.with, without)
+        return SearchOption(keyScore.searchKey.with, keyScore.searchKey.without)
     }
 
     fun findMax(letter: Char, searchKey: SearchKey, words: List<Word>, depth: Int, alpha: Int, beta: Int ): SearchKeyScore {
-        val guesses: Map<SearchKey, List<Word>> = wordCache.makeGuess(letter, searchKey.with, searchKey.without, words)
-
         if (depth <= 0) {
-            return SearchKeyScore(searchKey, 0)
+            return SearchKeyScore(searchKey, words.size)
         } else {
+            val guesses: Map<SearchKey, List<Word>> = wordCache.makeGuess(letter, searchKey.with, searchKey.without, words)
+            var currentMax : SearchKeyScore? = null
             for (guess in guesses.keys.toMutableList().sortedBy { -guesses[it]!!.size }) {
-                findMin(guess, guesses[guess]!!, depth - 1, alpha, beta)
+                var x = findMin(guess, guesses[guess]!!, depth - 1, alpha, beta)
+                if (currentMax == null || currentMax.score < x.score) {
+                    currentMax = x
+                }
             }
+            return currentMax!!
         }
-
     }
 
     fun findMin(searchKey: SearchKey, words: List<Word>, depth: Int, alpha: Int, beta: Int ): SearchKeyScore {
-        val untouchedLetters = lettersByFreq
-                .filter{ !searchKey.with.contains(it) }
-                .filter{ !searchKey.without.contains(it) }
-                .take(10)
         if (depth <= 0) {
-            return SearchKeyScore(searchKey, 0)
+            return SearchKeyScore(searchKey, words.size)
         } else {
+            val untouchedLetters = lettersByFreq
+                    .filter{ !searchKey.with.contains(it) }
+                    .filter{ !searchKey.without.contains(it) }
+                    .take(10)
+            var currentMin : SearchKeyScore? = null
             for (letter in untouchedLetters) {
-                findMax(letter, searchKey, words, depth - 1, alpha, beta)
-            }
-        }
-        return SearchKeyScore(searchKey, 0)
-    }
-
-    fun makeGuess(with: List<Char?>, without: Set<Char>, words: List<Word>, depth: Int): SearchKey {
-
-        for (letter: Char in untouchedLetters) {
-            val guesses: Map<SearchKey, List<Word>> = wordCache.makeGuess(letter, with, without, words)
-
-            if (depth > 0) {
-                for (guess in guesses.keys.toMutableList().sortedBy { -guesses[it]!!.size }) {
-                    makeGuess(guess.with, guess.without, guesses[guess]!!, depth - 1)
+                var x = findMax(letter, searchKey, words, depth - 1, alpha, beta)
+                if (currentMin == null || currentMin.score > x.score) {
+                    currentMin = x
                 }
-            } else {
-                return wordCache.makeGuess(letter, with, without, words).maxBy { it.value.size }
             }
+            return currentMin!!
         }
-
-        return untouchedLetters.map{ letter ->
-            letter to wordCache.makeGuess(letter, with, without, words)
-        }.toMap()
     }
 }
 
