@@ -1,0 +1,66 @@
+body {
+  font: 14px "Century Gothic", Futura, sans-serif;
+  margin: 20px;
+}
+
+.basic-button {
+  margin-right: 10px;
+  margin-bottom: 10px;
+  float: left;
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  padding: 9px;
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+}
+
+.basic-button:hover {
+  background: #eee;
+  cursor: pointer;
+}
+
+.buttons {
+  width: 100%;
+  float: left;
+}
+
+.title {
+  padding-bottom: 10px;
+}
+
+.label {
+  float: left;
+  padding-right: 5px;
+}
+
+.word {
+    width: 100%;
+    float: left;
+    height: 40px;
+}
+
+.letter {
+    font-size:200%;
+    float: left;
+    margin-right: 5px;
+}
+
+.wrong-guesses {
+    width: 100%;
+    float: left;
+    height: 20px;
+    padding: 15px 0 20px;
+}
+
+.wrong-guess {
+    float: left;
+    margin-right: 2px;
+}
+
+
+
+.game {
+  display: flex;
+  flex-direction: row;
+}
